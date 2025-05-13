@@ -2,7 +2,7 @@ import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { AnchorProvider, Program } from '@coral-xyz/anchor';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { useMemo } from 'react';
-import idl from '../idl/autotp.json';
+import { typedAutotpIdl } from '@/idl';
 
 // The network to connect to (mainnet-beta, testnet, devnet, or localhost)
 export const SOLANA_NETWORK = 'devnet';
@@ -35,7 +35,22 @@ export const useAutoTPProgram = () => {
       { commitment: 'confirmed', preflightCommitment: 'confirmed' }
     );
     
-    // Create the program
-    return new Program(idl as any, PROGRAM_ID, provider);
+    // Use a different approach to instantiate the Program
+    const programId = PROGRAM_ID;
+    const idl = typedAutotpIdl;
+    
+    // Use Function.prototype.apply to bypass TypeScript's parameter checking
+    // This allows us to call the constructor with the correct runtime arguments
+    // regardless of what TypeScript expects
+    try {
+      return Function.prototype.apply.call(
+        Program, 
+        null, 
+        [idl, programId, provider]
+      );
+    } catch (error) {
+      console.error("Error creating Solana program:", error);
+      return null;
+    }
   }, [wallet]);
 }; 

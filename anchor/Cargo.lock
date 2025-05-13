@@ -1682,3 +1682,8 @@ dependencies = [
  "quote",
  "syn 2.0.101",
 ]
+
+[[patch.unused]]
+name = "proc-macro2"
+version = "1.0.69"
+source = "git+https://github.com/dtolnay/proc-macro2?tag=1.0.69#937bbcdcc15ef7bc7ee90813dc72093a2beb30c5"

@@ -14,10 +14,7 @@ import dynamic from 'next/dynamic'
 import { ReactNode, useCallback, useMemo } from 'react'
 import { useCluster } from '../cluster/cluster-data-access'
 import '@solana/wallet-adapter-react-ui/styles.css'
-import { AnchorProvider, Program } from '@coral-xyz/anchor'
-import { Autotp } from '@/idl/autotp'
-import { PROGRAM_ID } from '@/lib/solana'
-import idl from '@/idl/autotp.json'
+import { AnchorProvider } from '@coral-xyz/anchor'
 
 export const WalletButton = dynamic(async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton, {
   ssr: false,
@@ -55,11 +52,4 @@ export function useAnchorProvider() {
   );
 }
 
-export function useAutoTPProgram() {
-  const provider = useAnchorProvider();
-  
-  return useMemo(() => {
-    if (!provider.wallet) return null;
-    return new Program<Autotp>(idl as any, PROGRAM_ID, provider);
-  }, [provider]);
-}
+// Note: For the AutoTPProgram, use the implementation from lib/solana.ts

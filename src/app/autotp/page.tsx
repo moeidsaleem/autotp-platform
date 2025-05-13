@@ -3,10 +3,17 @@
 import { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
-import { useAutoTPProgram } from '@/components/solana/solana-provider'
+import { useAutoTPProgram } from '@/lib/solana'
 import { initializeVault, fetchVaultByOwner } from '@/lib/autotp'
 import { WalletButton } from '@/components/solana/solana-provider'
 import BN from 'bn.js'
+import { Vault } from '@/idl'
+
+// Define a type for the vault data structure
+interface VaultData {
+  pubkey: PublicKey;
+  account: Vault;
+}
 
 export default function AutoTPPage() {
   const wallet = useWallet()
@@ -15,7 +22,7 @@ export default function AutoTPPage() {
   const [tokenMint, setTokenMint] = useState<string>('')
   const [referrer, setReferrer] = useState<string>('')
   const [status, setStatus] = useState<string>('')
-  const [vault, setVault] = useState<any>(null)
+  const [vault, setVault] = useState<VaultData | null>(null)
 
   const isConnected = !!wallet.publicKey
   

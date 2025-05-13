@@ -1,49 +1,80 @@
-import Link from 'next/link'
+'use client'
+
+import { BackgroundDecoration } from '@/components/BackgroundDecoration'
+import { ConnectButton } from '@/components/ConnectButton'
+import { DevModeProvider } from '@/components/DevModeToggle'
+import { FeatureCarousel } from '@/components/FeatureCarousel'
+import { Logo } from '@/components/Logo'
+import { OrdersTable } from '@/components/OrdersTable'
+import { ReferralLinkCreator } from '@/components/ReferralLinkCreator'
+import { Snackbar } from '@/components/Snackbar'
+import { StatusLine } from '@/components/StatusLine'
+import TakeProfitCard from '@/components/TakeProfitCard'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  // Use this to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleOrderArmed = (message: string) => {
+    setSnackbarMessage(message);
+  };
+
+  if (!mounted) {
+    return null; // Prevents hydration mismatch
+  }
+
   return (
-    <div className="container mx-auto p-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6">AutoTP: Automated Take Profit for Solana</h1>
+    <DevModeProvider>
+      <div className="min-h-screen w-full bg-transparent text-neutral-50 relative overflow-x-hidden">
+        <BackgroundDecoration />
         
-        <p className="text-lg mb-6">
-          Welcome to AutoTP, a Solana program that helps you automate your take-profit orders.
-          Set your target price, and let the program execute the trade when market conditions meet your criteria.
-        </p>
-        
-        <div className="grid gap-8 md:grid-cols-2 mb-10">
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-3">How It Works</h2>
-            <ol className="list-decimal pl-5 space-y-2">
-              <li>Connect your Solana wallet</li>
-              <li>Create a new take profit order</li>
-              <li>Specify your token and target price</li>
-              <li>Fund your vault</li>
-              <li>The order executes automatically when the price reaches your target</li>
-            </ol>
+        <header className="flex justify-between items-center px-6 pt-6 pb-3 md:pt-8 md:pb-4 transition-all duration-300 ease-out">
+          <Logo />
+          <ConnectButton />
+        </header>
+
+        <main className="container mx-auto px-4 pb-24 transition-all duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            {/* Left column - Hero Text and Feature Carousel */}
+            <div className="space-y-6 md:col-span-4 md:mt-16 lg:mt-20 transform transition-all duration-500 ease-out">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent animate-gradient">
+                Lock In Gains.
+                <br />
+                Sleep Easy.
+              </h1>
+              <p className="text-lg md:text-xl text-neutral-400 max-w-md">
+                Automate your exits before it&apos;s too late.
+              </p>
+              <div className="pt-2">
+                <FeatureCarousel />
+              </div>
+            </div>
+
+            {/* Take Profit Card */}
+            <div className="md:col-span-4 transform transition-all duration-500 delay-100 ease-out">
+              <TakeProfitCard onOrderArmed={handleOrderArmed} />
+            </div>
+
+            {/* History and Referral */}
+            <div className="space-y-6 md:col-span-4 transform transition-all duration-500 delay-200 ease-out">
+              <OrdersTable />
+              <ReferralLinkCreator />
+            </div>
           </div>
-          
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-3">Features</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Fully decentralized execution</li>
-              <li>Low fees (only 1% of the trade value)</li>
-              <li>Optional referral system</li>
-              <li>Cancel your order anytime</li>
-              <li>Compatible with all SPL tokens</li>
-            </ul>
-          </div>
+        </main>
+
+        <div className="fixed bottom-0 left-0 w-full z-20">
+          <StatusLine />
         </div>
-        
-        <div className="flex justify-center">
-          <Link 
-            href="/autotp" 
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center text-lg"
-          >
-            Get Started →
-          </Link>
-        </div>
+
+        <Snackbar message={snackbarMessage} />
       </div>
-    </div>
+    </DevModeProvider>
   )
 }

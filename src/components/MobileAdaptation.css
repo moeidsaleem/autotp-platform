@@ -1,0 +1,255 @@
+/* Global responsive styles */
+.glass-card {
+  @apply backdrop-blur-md bg-black/30 border border-white/10 rounded-xl shadow-lg;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  @apply border-white/20;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+/* Animation keyframes */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.85; transform: translate(-50%, -50%) scale(0.95); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0.85; transform: translate(-50%, -50%) scale(0.95); }
+}
+
+@keyframes pulse-delay {
+  0% { opacity: 0.85; transform: translate(-50%, 50%) scale(0.9); }
+  50% { opacity: 1; transform: translate(-50%, 50%) scale(1.05); }
+  100% { opacity: 0.85; transform: translate(-50%, 50%) scale(0.9); }
+}
+
+@keyframes grid-fade {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes dots-fade {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in {
+  0% { transform: translateX(-20px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* Tablet adaptations */
+@media (max-width: 1024px) {
+  main .grid {
+    @apply grid-cols-1 md:grid-cols-2 gap-6 !important;
+  }
+  
+  main .grid > div:nth-child(3) {
+    @apply md:col-span-2;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Header adaptations */
+  header {
+    @apply py-3 px-4 sticky top-0 z-30 backdrop-blur-md bg-black/40;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  header .logo-text {
+    @apply hidden;
+  }
+  
+  .connect-button-text {
+    @apply hidden;
+  }
+  
+  /* Card adaptations */
+  main {
+    @apply px-2 pt-4;
+  }
+  
+  /* Fix for mobile grid layout */
+  main .grid {
+    @apply grid-cols-1 gap-4 !important;
+  }
+  
+  /* Add vertical spacing between grid items in mobile view */
+  main .grid > div {
+    @apply mb-6;
+  }
+  
+  /* Stacking sliders vertically */
+  .sliders-container {
+    @apply flex flex-col gap-4;
+  }
+  
+  /* Status line becomes sticky toast */
+  .status-line {
+    @apply fixed bottom-0 left-0 w-full rounded-none z-30;
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Orders table becomes card-based list */
+  .orders-table {
+    @apply w-full overflow-x-hidden mt-4;
+  }
+  
+  .orders-table-content {
+    @apply w-full px-2;
+  }
+  
+  /* Token selector modal fixes */
+  [role="dialog"] {
+    @apply !z-50;
+  }
+  
+  /* Orders table mobile improvements */
+  .orders-table {
+    @apply w-full overflow-x-hidden mt-4;
+    max-height: 90vh !important;
+  }
+  
+  .orders-table-content {
+    @apply w-full px-2;
+  }
+  
+  /* Mobile order cards specific styling */
+  .orders-table .bg-neutral-900\/60 {
+    @apply transition-colors border border-neutral-800 rounded-xl hover:border-neutral-700;
+  }
+  
+  .orders-table .bg-neutral-900\/60:active {
+    @apply bg-neutral-800/60;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Referral link creator mobile adaptations */
+  .glass-card {
+    @apply mx-0 w-full;
+  }
+  
+  .glass-card .flex {
+    @apply flex-col;
+  }
+  
+  .glass-card button {
+    @apply w-full mt-2;
+  }
+  
+  /* Hero text mobile adaptations */
+  h1.text-4xl {
+    @apply text-3xl;
+    margin-bottom: 1rem;
+  }
+
+  main > .container {
+    @apply px-2;
+  }
+  
+  /* Feature carousel mobile adaptations */
+  .feature-carousel-container {
+    @apply w-full;
+  }
+  
+  .feature-card {
+    width: 220px !important;
+  }
+}
+
+/* Token selector modal styling */
+.glass-card {
+  @apply relative z-10;
+}
+
+[role="dialog"] {
+  @apply z-50;
+}
+
+/* Button and interactive element improvements */
+button, 
+.interactive {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+button:active, 
+.interactive:active {
+  transform: scale(0.98);
+}
+
+/* Custom animation for active states with ripple effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 0.5s;
+}
+
+.ripple:active::after {
+  transform: scale(0, 0);
+  opacity: 0.3;
+  transition: 0s;
+}
+
+/* Card and component entrance animations */
+.fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.slide-in {
+  animation: slide-in 0.4s ease-out forwards;
+}
+
+/* Card shadows and effects */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
+}
+
