@@ -9,11 +9,15 @@ import {
   WalletProvider,
 } from '@solana/wallet-adapter-react'
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
+import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
 import dynamic from 'next/dynamic'
 import { ReactNode, useCallback, useMemo } from 'react'
 import { useCluster } from '../cluster/cluster-data-access'
 import '@solana/wallet-adapter-react-ui/styles.css'
-import { AnchorProvider } from '@coral-xyz/anchor'
+import { AnchorProvider, Program } from '@coral-xyz/anchor'
+import { Autotp } from '@/idl/autotp'
+import { PROGRAM_ID } from '@/lib/solana'
+import idl from '@/idl/autotp.json'
 
 export const WalletButton = dynamic(async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton, {
   ssr: false,
@@ -26,9 +30,15 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     console.error(error)
   }, [])
 
+  // Define the wallet adapters to use
+  const wallets = useMemo(() => [
+    new PhantomWalletAdapter(),
+    new SolflareWalletAdapter(),
+  ], []);
+
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={[]} onError={onError} autoConnect={true}>
+      <WalletProvider wallets={wallets} onError={onError} autoConnect={true}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
@@ -39,5 +49,17 @@ export function useAnchorProvider() {
   const { connection } = useConnection()
   const wallet = useWallet()
 
-  return new AnchorProvider(connection, wallet as AnchorWallet, { commitment: 'confirmed' })
+  return useMemo(() => 
+    new AnchorProvider(connection, wallet as AnchorWallet, { commitment: 'confirmed' }),
+    [connection, wallet]
+  );
+}
+
+export function useAutoTPProgram() {
+  const provider = useAnchorProvider();
+  
+  return useMemo(() => {
+    if (!provider.wallet) return null;
+    return new Program<Autotp>(idl as any, PROGRAM_ID, provider);
+  }, [provider]);
 }
