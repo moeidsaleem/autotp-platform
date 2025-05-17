@@ -2,11 +2,14 @@
 # Specifying an explicit Solana version that's compatible with Anchor 0.27.0
 solana = "1.14.17"
 package_manager = "yarn"
-anchor_version = "0.31.1"
+anchor_version = "0.27.0"
 
 [features]
-resolution = true
-skip-lint = false
+skip-lint = true
+seeds = false
+skip-idl-build = true
+no-idl = true
+no-entrypoint = false
 
 [programs.localnet]
 autotp = "FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
@@ -30,3 +33,9 @@ build-all = "anchor run build && anchor run idl && anchor run copy-idl"
 
 [build]
 skip-build = false
+# Use more aggressive optimization for BPF programs
+bpf-flags = [
+  "-Zlocation-detail=none",
+  "-Copt-level=3",
+  "-Clink-arg=-zstack-size=8192", # Try with a larger stack size
+]

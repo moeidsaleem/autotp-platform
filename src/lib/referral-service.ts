@@ -1,8 +1,8 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { BN } from '@coral-xyz/anchor';
 
-// Use the correct program ID from the auto-tp-program.ts file
-const AUTOTP_PROGRAM_ID = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin');
+// Use the correct program ID from the actual deployed Rust program
+const AUTOTP_PROGRAM_ID = new PublicKey('4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq');
 
 export interface ReferralStats {
   totalEarningsUsd: number;

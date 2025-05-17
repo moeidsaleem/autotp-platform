@@ -2,6 +2,8 @@
 
 # Exit on error
 set -e
+# Echo commands
+set -x
 
 # Make sure required tools are installed
 if ! command -v anchor &> /dev/null; then
@@ -15,19 +17,19 @@ rm -rf target/deploy/
 rm -rf target/idl/
 rm -rf .anchor/
 
-# Set environment variables to disable frozen-abi
-export RUSTFLAGS="--cfg feature=\"no-idl-build\" --cfg feature=\"skip-lint\""
+# Use Anchor build directly with the updated configs in Anchor.toml
+echo "Building program using anchor build..."
+export ANCHOR_SKIP_IDL_BUILD=1 
+export ANCHOR_SKIP_LINT=1
+anchor build
 
-# Build the program first using cargo directly with specific flags
-echo "Building program using cargo with disabled frozen-abi..."
-cd programs/autotp
-cargo build-sbf --no-default-features
-cd ../..
-
-# Copy binary to expected location
-echo "Setting up deployment files..."
-mkdir -p target/deploy/
-cp $(find ./target/deploy -name "*.so" 2>/dev/null || echo "./target/sbf-solana-solana/release/autotp.so") target/deploy/autotp.so
+# Check if build succeeded by verifying file exists
+if [ ! -f "target/deploy/autotp.so" ]; then
+    echo "Build failed - target/deploy/autotp.so not found."
+    exit 1
+else
+    echo "Build successful! Binary size: $(ls -lh target/deploy/autotp.so | awk '{print $5}')"
+fi
 
 # Get the program ID
 PROGRAM_ID="FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
@@ -48,7 +50,7 @@ if (( $(echo "$BALANCE < 1.0" | bc -l) )); then
     sleep 2
 fi
 
-# Deploy to devnet using solana cli directly
+# Attempt to deploy
 echo "Deploying to devnet..."
 solana program deploy target/deploy/autotp.so --program-id $PROGRAM_ID
 

@@ -160,80 +160,94 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
             isStopLossEnabled ? ` / SL ${formatStopLossValue(stopLossValue)}×` : ''
           }, ${takeProfitPercent}% holding`;
           onOrderArmed(successMessage);
-        }, 800);
-      } else {
-        // Real order processing using Solana program
-        if (!selectedToken || !selectedToken.mint || !publicKey) {
-          throw new Error("Missing token or wallet information");
-        }
-        
-        // Create the token mint public key
-        const tokenMint = new PublicKey(selectedToken.mint);
-        
-        // Current price estimation (in a real app, fetch from an oracle)
-        const currentPrice = ('price' in selectedToken) 
-          ? (selectedToken as TokenWithPrice).price || 1
-          : 1;
-        
-        console.log('Debug info:', {
-          tokenMint: tokenMint.toString(),
-          targetValue,
-          currentPrice,
-          takeProfitPercent,
-          walletPublicKey: wallet.publicKey?.toString()
-        });
-        
-        try {
-          if (!wallet.publicKey) {
-            throw new Error("Wallet not connected");
-          }
           
-          // Create an Anchor compatible wallet with explicit type assertion
-          const anchorCompatWallet = {
-            publicKey: wallet.publicKey,
-            signTransaction: wallet.signTransaction!,
-            signAllTransactions: wallet.signAllTransactions!,
-          };
-          
-          // Call the Solana program to create the take profit order
-          const txId = await createTakeProfitOrder(
-            connection,
-            anchorCompatWallet,
-            tokenMint,
-            targetValue,
-            currentPrice,
-            takeProfitPercent
-          );
-          
-          setIsSubmitting(false);
-          setIsVaultAnimating(false);
-          
-          const successMessage = `Order armed 🎯 ${selectedToken?.symbol} at ${formatTargetValue(targetValue)}×${
-            isStopLossEnabled ? ` / SL ${formatStopLossValue(stopLossValue)}×` : ''
-          }, ${takeProfitPercent}% holding`;
-          
-          onOrderArmed(successMessage);
-          
-          // Show transaction ID in toast
+          // Show mock transaction ID in toast
+          const mockTxId = "DevModeTransaction_" + Math.random().toString(36).substring(2, 15);
           toast({
             title: "Transaction confirmed",
-            description: `${txId.slice(0, 8)}...`,
+            description: `${mockTxId.slice(0, 8)}...`,
           });
           
           // Dispatch event to update orders table
           const newOrderEvent = new CustomEvent('new-order-created');
           window.dispatchEvent(newOrderEvent);
-        } catch (txError: unknown) {
-          console.error("Transaction error:", txError);
-          setIsSubmitting(false);
-          setIsVaultAnimating(false);
-          const errorMessage = txError instanceof Error ? txError.message : 'Unknown error';
-          toast({
-            title: "Failed to arm take profit order",
-            description: errorMessage,
-            variant: "destructive",
-          });
+        }, 800);
+        return; // Exit early for dev mode
+      }
+      
+      // Real order processing using Solana program
+      if (!selectedToken || !selectedToken.mint || !publicKey) {
+        throw new Error("Missing token or wallet information");
+      }
+      
+      // Create the token mint public key
+      const tokenMint = new PublicKey(selectedToken.mint);
+      
+      // Current price estimation (in a real app, fetch from an oracle)
+      const currentPrice = ('price' in selectedToken) 
+        ? (selectedToken as TokenWithPrice).price || 1
+        : 1;
+      
+      console.log('Debug info:', {
+        tokenMint: tokenMint.toString(),
+        targetValue,
+        currentPrice,
+        takeProfitPercent,
+        walletPublicKey: wallet.publicKey?.toString()
+      });
+      
+      try {
+        if (!wallet.publicKey) {
+          throw new Error("Wallet not connected");
         }
+        
+        // Create an Anchor compatible wallet with explicit type assertion
+        const anchorCompatWallet = {
+          publicKey: wallet.publicKey,
+          signTransaction: wallet.signTransaction!,
+          signAllTransactions: wallet.signAllTransactions!,
+        };
+        
+        // Call the Solana program to create the take profit order
+        const txId = await createTakeProfitOrder(
+          connection,
+          anchorCompatWallet,
+          tokenMint,
+          targetValue,
+          currentPrice,
+          takeProfitPercent,
+          undefined, // referrer
+          devMode // This won't matter now since we exit early for devMode
+        );
+        
+        setIsSubmitting(false);
+        setIsVaultAnimating(false);
+        
+        const successMessage = `Order armed 🎯 ${selectedToken?.symbol} at ${formatTargetValue(targetValue)}×${
+          isStopLossEnabled ? ` / SL ${formatStopLossValue(stopLossValue)}×` : ''
+        }, ${takeProfitPercent}% holding`;
+        
+        onOrderArmed(successMessage);
+        
+        // Show transaction ID in toast
+        toast({
+          title: "Transaction confirmed",
+          description: `${txId.slice(0, 8)}...`,
+        });
+        
+        // Dispatch event to update orders table
+        const newOrderEvent = new CustomEvent('new-order-created');
+        window.dispatchEvent(newOrderEvent);
+      } catch (txError: unknown) {
+        console.error("Transaction error:", txError);
+        setIsSubmitting(false);
+        setIsVaultAnimating(false);
+        const errorMessage = txError instanceof Error ? txError.message : 'Unknown error';
+        toast({
+          variant: "destructive",
+          title: "Failed to arm take profit order",
+          description: errorMessage,
+        });
       }
     } catch (error) {
       console.error("Error creating take profit order:", error);
@@ -241,9 +255,9 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
       setIsVaultAnimating(false);
       const errorDescription = error instanceof Error ? error.message : "Please try again";
       toast({
+        variant: "destructive",
         title: "Failed to arm take profit order",
         description: errorDescription,
-        variant: "destructive",
       });
     }
   };

@@ -10,7 +10,7 @@ export const SOLANA_NETWORK = 'devnet';
 // Program ID from the IDL 
 // TEMP: Using the Serum program ID here as it exists on devnet
 // This is just a placeholder for testing the UI flow until we deploy our own program
-export const PROGRAM_ID = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin');
+export const PROGRAM_ID = new PublicKey('4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq');
 
 // Helper to get an RPC endpoint URL based on the network
 export const getEndpoint = () => {

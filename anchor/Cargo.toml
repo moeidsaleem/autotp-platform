@@ -2,12 +2,20 @@
 members = [
     "programs/autotp"
 ]
+exclude = [
+    "programs/anchor"
+]
 resolver = "2"
 
 [profile.release]
 overflow-checks = true
 lto = "fat"
 codegen-units = 1
+opt-level = 3
+panic = "abort"
+debug = false
+debug-assertions = false
+
 [profile.release.build-override]
 opt-level = 3
 incremental = false

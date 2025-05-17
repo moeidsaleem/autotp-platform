@@ -193,6 +193,7 @@ export async function createTakeProfitOrder(
   currentPrice: number,
   percentToSell: number,
   referrer?: PublicKey,
+  devModeOverride = false, // Added dev mode parameter
 ): Promise<string> {
   try {
     console.log('Creating take profit order with parameters:', {
@@ -200,7 +201,8 @@ export async function createTakeProfitOrder(
       tokenMint: tokenMint.toString(),
       targetMultiplier,
       currentPrice,
-      percentToSell
+      percentToSell,
+      devMode: devModeOverride
     });
 
     // Create an Anchor provider
@@ -214,13 +216,16 @@ export async function createTakeProfitOrder(
       { commitment: 'confirmed' }
     );
 
-    // Check if the program exists before proceeding
-    const programExists = await checkProgramExists(connection, AUTOTP_PROGRAM_ID);
-    if (!programExists) {
-      throw new Error(
-        `Program ${AUTOTP_PROGRAM_ID.toString()} not found on the network. ` +
-        'Please deploy the program to this network first before trying to create take profit orders.'
-      );
+    // Skip program existence check if in dev mode
+    if (!devModeOverride) {
+      // Check if the program exists before proceeding
+      const programExists = await checkProgramExists(connection, AUTOTP_PROGRAM_ID);
+      if (!programExists) {
+        throw new Error(
+          `Program ${AUTOTP_PROGRAM_ID.toString()} not found on the network. ` +
+          'Please deploy the program to this network first before trying to create take profit orders.'
+        );
+      }
     }
 
     const program = createAutotpProgram(provider);
@@ -248,6 +253,11 @@ export async function createTakeProfitOrder(
       owner: wallet.publicKey.toString(),
       tokenMint: tokenMint.toString()
     });
+
+    // If in dev mode, return a mock transaction signature instead of calling the program
+    if (devModeOverride) {
+      return "DevModeTransaction_" + Math.random().toString(36).substring(2, 15);
+    }
 
     // Initialize the take profit order - match the exact structure expected by the Rust program
     const tx = await program.methods
