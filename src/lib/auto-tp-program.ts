@@ -14,8 +14,7 @@ interface WalletAdapter {
 }
 
 // Program constants
-// TEMP: Using Serum DEX program ID for testing as it exists on devnet  
-const AUTOTP_PROGRAM_ID = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin');
+const AUTOTP_PROGRAM_ID = new PublicKey('4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq');
 
 /**
  * Helper function to check if a program exists on the blockchain
