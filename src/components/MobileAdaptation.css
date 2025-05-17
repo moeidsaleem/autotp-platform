@@ -92,7 +92,7 @@
   
   /* Add vertical spacing between grid items in mobile view */
   main .grid > div {
-    @apply mb-6;
+    @apply mb-4;
   }
   
   /* Stacking sliders vertically */
@@ -107,37 +107,59 @@
     border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
   
+  /* Token selector better fit for small screens */
+  .token-selector-scrollable {
+    @apply max-h-[50vh] !important;
+  }
+
+  /* Better fitting charts on mobile */
+  .token-price-chart {
+    @apply h-36 !important;
+  }
+  
   /* Orders table becomes card-based list */
   .orders-table {
     @apply w-full overflow-x-hidden mt-4;
+    max-height: 60vh !important;
+  }
+  
+  /* Order table header improvements */
+  .orders-table [role="button"],
+  .orders-table .cursor-pointer {
+    @apply py-3;
   }
   
   .orders-table-content {
     @apply w-full px-2;
+  }
+  
+  /* Tab selection for orders table */
+  .orders-table .flex.space-x-1,
+  .orders-table .flex.space-x-2 {
+    @apply justify-center;
+  }
+  
+  /* Consistent padding in order cards */
+  .orders-table .bg-neutral-900\/60 {
+    @apply transition-colors border border-neutral-800 rounded-xl p-3 hover:border-neutral-700;
+  }
+
+  /* Grid alignment for order details */
+  .orders-table .grid {
+    @apply gap-y-2 mt-3;
+  }
+  
+  .orders-table .grid.grid-cols-2 > div {
+    @apply flex items-center;
+  }
+
+  .orders-table .bg-neutral-900\/60:active {
+    @apply bg-neutral-800/60;
   }
   
   /* Token selector modal fixes */
   [role="dialog"] {
     @apply !z-50;
-  }
-  
-  /* Orders table mobile improvements */
-  .orders-table {
-    @apply w-full overflow-x-hidden mt-4;
-    max-height: 90vh !important;
-  }
-  
-  .orders-table-content {
-    @apply w-full px-2;
-  }
-  
-  /* Mobile order cards specific styling */
-  .orders-table .bg-neutral-900\/60 {
-    @apply transition-colors border border-neutral-800 rounded-xl hover:border-neutral-700;
-  }
-  
-  .orders-table .bg-neutral-900\/60:active {
-    @apply bg-neutral-800/60;
   }
   
   /* Hide scrollbar but keep functionality */
@@ -155,31 +177,24 @@
     @apply mx-0 w-full;
   }
   
-  .glass-card .flex {
-    @apply flex-col;
+  /* Take profit amount presets */
+  .take-profit-presets {
+    @apply flex flex-wrap justify-between;
   }
   
-  .glass-card button {
-    @apply w-full mt-2;
+  .take-profit-presets button {
+    @apply mb-2;
   }
   
-  /* Hero text mobile adaptations */
-  h1.text-4xl {
-    @apply text-3xl;
-    margin-bottom: 1rem;
-  }
-
-  main > .container {
-    @apply px-2;
+  /* Slider labels */
+  .slider-container label {
+    @apply text-xs;
   }
   
-  /* Feature carousel mobile adaptations */
-  .feature-carousel-container {
-    @apply w-full;
-  }
-  
-  .feature-card {
-    width: 220px !important;
+  /* Snackbar positioning */
+  .snackbar {
+    @apply bottom-12 !important;
+    width: calc(100% - 24px) !important;
   }
 }
 

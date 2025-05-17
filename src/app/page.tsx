@@ -1,7 +1,7 @@
 'use client'
 
 import { BackgroundDecoration } from '@/components/BackgroundDecoration'
-import { ConnectButton } from '@/components/ConnectButton'
+// import { ConnectButton } from '@/components/ConnectButton'
 import { DevModeProvider } from '@/components/DevModeToggle'
 import { FeatureCarousel } from '@/components/FeatureCarousel'
 import { OrdersTable } from '@/components/OrdersTable'
@@ -33,41 +33,12 @@ export default function Home() {
       <div className="min-h-screen w-full bg-transparent text-neutral-50 relative overflow-x-hidden">
         <BackgroundDecoration />
         
-        <main className="container mx-auto px-4 pb-24 transition-all duration-300">
-          {/* Hero section with animated gradient border */}
-          <div className="relative mb-12 mt-4 p-[1px] rounded-lg overflow-hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x">
-            <div className="absolute inset-0 bg-black bg-opacity-90 backdrop-blur-sm rounded-lg"></div>
-            <div className="relative rounded-lg p-6 md:p-8 z-10">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent animate-gradient mb-4">
-                AutoTP for Solana
-              </h1>
-              <p className="text-xl md:text-2xl text-neutral-300 max-w-2xl mb-6">
-                The first automated take profit solution for Solana. Set it and forget it - we&apos;ll handle your exits so you don&apos;t have to.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <a 
-                  href="#create-order" 
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium rounded-md transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  Get Started
-                </a>
-                <a 
-                  href="/autotp" 
-                  className="px-6 py-3 border border-neutral-700 hover:border-neutral-500 text-neutral-200 font-medium rounded-md transition-all duration-300"
-                >
-                  Learn More
-                </a>
-                <div className="hidden sm:block">
-                  <ConnectButton />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start" id="create-order">
+        <main className="container mx-auto px-4 sm:px-6 pb-24 transition-all duration-300">
+       
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-start pt-4 sm:pt-8" id="create-order">
             {/* Left column - Hero Text and Feature Carousel */}
-            <div className="space-y-6 md:col-span-4 md:mt-8 lg:mt-12 transform transition-all duration-500 ease-out">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent mb-4">
+            <div className="space-y-4 sm:space-y-6 md:col-span-4 md:mt-6 lg:mt-12 transform transition-all duration-500 ease-out">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent mb-2 sm:mb-4">
                 Lock In Gains.<br />
                 Sleep Easy.
               </h2>
@@ -85,7 +56,7 @@ export default function Home() {
             </div>
 
             {/* History and Referral */}
-            <div className="space-y-6 md:col-span-4 transform transition-all duration-500 delay-200 ease-out">
+            <div className="space-y-4 sm:space-y-6 md:col-span-4 transform transition-all duration-500 delay-200 ease-out">
               <OrdersTable />
               <ReferralLinkCreator />
             </div>

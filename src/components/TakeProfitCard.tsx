@@ -52,15 +52,18 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
       setIsTokenSelectorOpen(true);
       return;
     }
+    
     const handleWalletConnected = () => {
       setIsConnected(true);
       setIsTokenSelectorOpen(true);
     };
+    
     window.addEventListener('wallet-connected', handleWalletConnected);
+    
     return () => {
       window.removeEventListener('wallet-connected', handleWalletConnected);
     };
-  }, [devMode]);
+  }, [devMode]); // Only depend on devMode
 
   // Set isConnected state based on real wallet connection in non-dev mode
   const [isConnected, setIsConnected] = useState(false);
@@ -113,14 +116,15 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
   };
 
   useEffect(() => {
+    // Only update selectedPreset if it doesn't already match takeProfitPercent
+    // for the preset values (25, 50, 100)
     if (takeProfitPercent === 25 || takeProfitPercent === 50 || takeProfitPercent === 100) {
       if (selectedPreset !== takeProfitPercent) {
         setSelectedPreset(takeProfitPercent as 25 | 50 | 100);
       }
-    } else {
-      if (selectedPreset !== null) {
-        setSelectedPreset(null);
-      }
+    } else if (selectedPreset !== null) {
+      // Only set to null if not already null
+      setSelectedPreset(null);
     }
   }, [takeProfitPercent, selectedPreset]);
 
@@ -263,116 +267,81 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
     <div className="glass-card w-full max-w-md p-6">
       <h2 className="text-xl font-semibold mb-6">Set Your Exit Plan</h2>
 
-      <div className="mb-4">
-        <div
-          onClick={() => isConnected && setIsTokenSelectorOpen(true)}
-          className={`flex items-center justify-between p-3 border border-neutral-700 rounded-lg cursor-pointer ${isConnected ? 'hover:border-neutral-500' : 'cursor-not-allowed'} animation-ease`}
+      <div className="flex flex-col space-y-4 mb-5">
+        <button
+          type="button"
+          onClick={() => setIsTokenSelectorOpen(true)}
+          disabled={!isConnected}
+          className={`w-full p-3 rounded-lg border ${
+            !isConnected
+              ? 'border-neutral-800 bg-neutral-900/60 text-neutral-500'
+              : selectedToken
+                ? 'border-neutral-700 bg-neutral-800/40 hover:border-contrast'
+                : 'border-contrast bg-contrast/10 animate-pulse-subtle'
+          } transition-all duration-200 text-left focus:outline-none`}
         >
           {selectedToken ? (
-            <>
-              <div className="flex items-center">
-                <div className="w-8 h-8 flex items-center justify-center bg-neutral-800 rounded-full mr-3">
-                  {selectedToken.icon}
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 flex items-center justify-center bg-neutral-800 rounded-full">
+                <span>{selectedToken.symbol.substring(0, 1)}</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="font-medium">{selectedToken.symbol}</div>
+                  <div className="text-sm text-neutral-400">
+                    {selectedToken.balance.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 6,
+                    })}
+                  </div>
                 </div>
-                <div>
-                  <div className="font-medium text-white">{selectedToken.name}</div>
-                  <div className="text-sm text-white">{selectedToken.symbol}</div>
+                <div className="text-xs text-neutral-400 truncate max-w-[240px]">
+                  {selectedToken.name}
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-white">{selectedToken.balance.toLocaleString()}</div>
-                <div className="text-sm text-white">{selectedToken.symbol}</div>
-              </div>
-            </>
+            </div>
           ) : (
-            <div className="text-white w-full text-center">
-              {isConnected ? "Select Token ▾" : "Connect wallet to start"}
+            <div className="py-1">
+              <div className="flex justify-between">
+                <span>Select Token</span>
+                <span>↓</span>
+              </div>
             </div>
           )}
-        </div>
-      </div>
+        </button>
 
-      {selectedToken && (
-        <div className="relative w-full h-48 mb-20">
-          <TokenPriceChart selectedToken={{
-            symbol: selectedToken.symbol,
-            name: selectedToken.name,
-            price: priceForChart
-          }} />
-        </div>
-      )}
-
-      <div className="mb-4" style={{ minHeight: '20px' }}>
-        <div className="flex justify-between items-center mb-2">
-          <label className="block text-sm text-neutral-400">
-            Take Profit Amount
-          </label>
-          <label className="block text-sm text-neutral-400">
-            Slippage
-          </label>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-2 items-center">
-            {TAKE_PROFIT_PRESETS.map(preset => (
-              <button
-                key={preset.value}
-                type="button"
-                className={`px-3 py-1 rounded-full border font-semibold text-xs transition focus:outline-none
-                ${selectedPreset === preset.value
-                  ? 'bg-contrast text-white border-contrast'
-                  : 'bg-neutral-900 text-white border-neutral-700 hover:border-contrast'}
-                ${!isConnected || !selectedToken ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={!isConnected || !selectedToken}
-                onClick={() => selectedPreset !== preset.value && handlePresetClick(preset.value as 25 | 50 | 100)}
-              >
-                {preset.label}
-              </button>
-            ))}
-            <div className="flex items-center">
-              <input
-                type="number"
-                min={0}
-                max={100}
-                step={1}
-                pattern="[0-9]*"
-                inputMode="numeric"
-                className={`w-14 text-center px-2 py-1 rounded border border-neutral-700 bg-neutral-900 text-white font-semibold text-xs focus:outline-none focus:border-contrast transition placeholder:text-neutral-500
-                ${selectedPreset === null ? 'ring-2 ring-contrast' : ''}
-                ${!isConnected || !selectedToken ? 'opacity-50 cursor-not-allowed' : ''}`}
-                value={takeProfitPercent}
-                onChange={handleCustomPercentChange}
-                disabled={!isConnected || !selectedToken}
-                aria-label="Custom percent"
-              />
-              <span className="ml-1 text-xs text-neutral-400">%</span>
-            </div>
+        {selectedToken && (
+          <div className="relative w-full h-48 mb-2">
+            <TokenPriceChart selectedToken={{
+              symbol: selectedToken.symbol,
+              name: selectedToken.name,
+              price: priceForChart
+            }} />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsSlippageDialogOpen(true)}
-            className="flex items-center gap-1 px-2 py-1 h-7 bg-neutral-900 border-neutral-700 hover:border-contrast hover:bg-neutral-800 text-neutral-400 hover:text-white text-sm font-semibold"
-          >
-            <span>{slippage}</span>
-            <Percent className="h-3 w-3" />
-          </Button>
-        </div>
-        <div className="text-xs text-neutral-500">
-          Specify the portion of holdings to sell when target is hit
-        </div>
-      </div>
+        )}
 
-      <div className="space-y-2 sliders-container">
-        <Slider
-          min={1.1}
-          max={10}
-          step={0.1}
-          defaultValue={targetValue}
-          onChange={handleTargetChange}
-          disabled={!isConnected || !selectedToken}
-          formatValue={formatTargetValue}
-          label="Target Price Multiplier"
-        />
+        <div className="space-y-3">
+          <label className="flex justify-between items-center mb-1">
+            <span className="text-sm text-neutral-400">Target Price Multiplier</span>
+            <span className="text-sm font-medium">{targetValue.toFixed(1)}×</span>
+          </label>
+          <div className="px-1">
+            <Slider
+              min={1.1}
+              max={10.0}
+              step={0.1}
+              defaultValue={targetValue}
+              onChange={handleTargetChange}
+              disabled={!isConnected || !selectedToken}
+              formatValue={formatTargetValue}
+              label="Target Price Multiplier"
+            />
+          </div>
+          <div className="flex justify-between text-xs text-neutral-400 px-1">
+            <span>1.1×</span>
+            <span>10.0×</span>
+          </div>
+        </div>
 
         <div className="flex items-center space-x-2 -mt-1 mb-1">
           <div className="flex-1">
@@ -404,7 +373,79 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
             label="Floor Price Multiplier"
           />
         )}
+      </div>
 
+      <div className="mb-4" style={{ minHeight: '20px' }}>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2 sm:gap-0">
+          <label className="block text-sm text-neutral-400">
+            Take Profit Amount
+          </label>
+          <label className="block text-sm text-neutral-400">
+            Slippage
+          </label>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+          <div className="flex flex-wrap sm:flex-nowrap space-x-2 items-center">
+            {TAKE_PROFIT_PRESETS.map(preset => (
+              <button
+                key={preset.value}
+                type="button"
+                className={`px-2 sm:px-3 py-1 rounded-full border font-semibold text-xs transition focus:outline-none
+                ${selectedPreset === preset.value
+                  ? 'bg-contrast text-white border-contrast'
+                  : 'bg-neutral-900 text-white border-neutral-700 hover:border-contrast'}
+                ${!isConnected || !selectedToken ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={!isConnected || !selectedToken}
+                onClick={() => selectedPreset !== preset.value && handlePresetClick(preset.value as 25 | 50 | 100)}
+              >
+                {preset.label}
+              </button>
+            ))}
+            <div className="flex items-center ml-2">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                pattern="[0-9]*"
+                inputMode="numeric"
+                className={`w-14 text-center px-2 py-1 rounded border border-neutral-700 bg-neutral-900 text-white font-semibold text-xs focus:outline-none focus:border-contrast transition placeholder:text-neutral-500
+                ${selectedPreset === null ? 'ring-2 ring-contrast' : ''}
+                ${!isConnected || !selectedToken ? 'opacity-50 cursor-not-allowed' : ''}`}
+                value={takeProfitPercent}
+                onChange={handleCustomPercentChange}
+                disabled={!isConnected || !selectedToken}
+                aria-label="Custom percent"
+              />
+              <span className="ml-1 text-xs text-neutral-400">%</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-1">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={`${slippage}`}
+              readOnly
+              className="w-10 h-7 bg-neutral-900 border border-neutral-700 rounded text-center text-sm text-white focus:border-contrast focus:outline-none cursor-pointer"
+              onClick={() => setIsSlippageDialogOpen(true)}
+            />
+            <span className="text-sm text-neutral-400">%</span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 rounded-full bg-transparent border-neutral-700 hover:bg-neutral-800 hover:border-contrast"
+              onClick={() => setIsSlippageDialogOpen(true)}
+            >
+              <Percent size={12} className="text-white" />
+            </Button>
+          </div>
+        </div>
+        <div className="text-xs text-neutral-500 mt-1">
+          Specify the portion of holdings to sell when target is hit
+        </div>
+      </div>
+
+      <div className="mt-3">
         <button
           onClick={handleArmOrder}
           disabled={isButtonDisabled}

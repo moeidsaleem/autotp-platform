@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { ChartContainer } from "./ui/chart";
 import { LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
@@ -116,7 +115,7 @@ export const TokenPriceChart: React.FC<TokenPriceChartProps> = ({ selectedToken 
     // Stop further animation after short period
     const timeout = setTimeout(() => setAnimate(false), 800);
     return () => clearTimeout(timeout);
-  }, [selectedToken, timeframe]);
+  }, [selectedToken, timeframe, defaultPrice]);
 
   if (!selectedToken) {
     return (

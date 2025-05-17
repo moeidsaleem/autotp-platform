@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Activity, Cpu, Clock, ChevronUp, ChevronDown, Wifi, AlertTriangle } from 'lucide-react';
 import { SOLANA_NETWORK } from '@/lib/solana';
 import { useConnection } from '@solana/wallet-adapter-react';
@@ -7,10 +7,11 @@ export const StatusLine: React.FC = () => {
   const [keeperTime, setKeeperTime] = useState(14);
   const [pythLatency, setPythLatency] = useState(130);
   const [collapsedOnMobile, setCollapsedOnMobile] = useState(true);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [netPing, setNetPing] = useState<number | null>(null);
   const [netStatus, setNetStatus] = useState<'online' | 'slow' | 'offline'>('online');
   
+  // Using a ref instead of state to avoid re-renders
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { connection } = useConnection();
 
   // Time formatter - "14s" or "130ms"
@@ -55,12 +56,17 @@ export const StatusLine: React.FC = () => {
       }
     }, 5000);
 
-    setIntervalId(interval);
+    // Store the interval in the ref
+    intervalRef.current = interval;
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      // Clear the interval using the ref
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }, [connection, intervalId]);
+  }, [connection]); // Only connection as dependency
 
   const getKeeperStatus = () => {
     if (keeperTime > 60) return 'text-red-400';

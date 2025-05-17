@@ -312,21 +312,21 @@ export const OrdersTable: React.FC = () => {
 
   return (
     <div className={cn(
-      "glass-card mt-6 overflow-hidden transition-all duration-300 ease-out orders-table",
+      "glass-card mt-4 sm:mt-6 overflow-hidden transition-all duration-300 ease-out orders-table",
       isExpanded ? 'max-h-[80vh]' : 'max-h-10'
     )}>
       <div 
-        className="flex items-center justify-between p-2 cursor-pointer" 
+        className="flex items-center justify-between p-2 px-3 sm:px-4 cursor-pointer" 
         onClick={toggleExpand}
       >
         <div className="flex items-center gap-2">
           <History size={16} className="text-neutral-400" />
           <span className="text-sm font-medium">Transaction History</span>
         </div>
-        <div className="flex space-x-2 md:space-x-4 overflow-x-auto no-scrollbar">
+        <div className="flex space-x-1 sm:space-x-2 md:space-x-4 overflow-x-auto no-scrollbar">
           <span 
             className={cn(
-              "px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
+              "px-1.5 sm:px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
               activeTab === 'armed' ? 'bg-neutral-700' : 'bg-transparent'
             )} 
             onClick={(e) => { e.stopPropagation(); setActiveTab('armed'); }}
@@ -335,7 +335,7 @@ export const OrdersTable: React.FC = () => {
           </span>
           <span 
             className={cn(
-              "px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
+              "px-1.5 sm:px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
               activeTab === 'filled' ? 'bg-neutral-700' : 'bg-transparent'
             )} 
             onClick={(e) => { e.stopPropagation(); setActiveTab('filled'); }}
@@ -344,7 +344,7 @@ export const OrdersTable: React.FC = () => {
           </span>
           <span 
             className={cn(
-              "px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
+              "px-1.5 sm:px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
               activeTab === 'cancelled' ? 'bg-neutral-700' : 'bg-transparent'
             )} 
             onClick={(e) => { e.stopPropagation(); setActiveTab('cancelled'); }}
@@ -358,14 +358,14 @@ export const OrdersTable: React.FC = () => {
       </div>
 
       {isExpanded && isLoading && (
-        <div className="p-8 text-center text-neutral-400">
+        <div className="p-4 sm:p-8 text-center text-neutral-400">
           Loading orders...
         </div>
       )}
 
       {isExpanded && !isLoading && filteredOrders.length > 0 && (
-        <div className="p-2 md:p-4 orders-table-content">
-          <div className="space-y-3">
+        <div className="p-3 sm:p-4 orders-table-content">
+          <div className="space-y-2 sm:space-y-3">
             {filteredOrders.map(order => {
               const pl = getPL(order);
               let plDisplay = '--';
@@ -379,23 +379,23 @@ export const OrdersTable: React.FC = () => {
                 <div key={order.id} className="bg-neutral-900/60 rounded-lg p-3 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 flex items-center justify-center bg-neutral-800 rounded-full text-sm font-medium">
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-neutral-800 rounded-full text-sm font-medium">
                         {order.icon}
                       </div>
                       <div>
-                        <span className="font-medium text-base">{order.token}</span>
-                        <div className="text-xs text-neutral-400">{formatDate(order.timestamp)} • {formatTime(order.timestamp)}</div>
+                        <span className="font-medium text-sm sm:text-base">{order.token}</span>
+                        <div className="text-[10px] sm:text-xs text-neutral-400">{formatDate(order.timestamp)} • {formatTime(order.timestamp)}</div>
                       </div>
                     </div>
                     <span className={cn(
-                      "px-2 py-1 rounded-full text-xs",
+                      "px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs",
                       getStatusColor(order.status)
                     )}>
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-3 text-xs">
+                  <div className="grid grid-cols-2 gap-x-3 sm:gap-x-4 gap-y-1 mt-2 sm:mt-3 text-[10px] sm:text-xs">
                     <div className="flex justify-between">
                       <span className="text-neutral-400">Size:</span>
                       <span className="font-medium">{order.size} {order.token}</span>
@@ -445,7 +445,7 @@ export const OrdersTable: React.FC = () => {
       )}
 
       {isExpanded && !isLoading && filteredOrders.length === 0 && (
-        <div className="p-8 text-center text-neutral-400">
+        <div className="p-4 sm:p-8 text-center text-neutral-400">
           {!publicKey && !devMode ? "Connect wallet to view orders" : `No ${activeTab} orders found`}
         </div>
       )}

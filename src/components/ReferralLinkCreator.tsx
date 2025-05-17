@@ -47,7 +47,7 @@ export const ReferralLinkCreator = () => {
   return (
     <div 
       className={cn(
-        "glass-card mt-6 overflow-hidden transition-all duration-300 ease-out referral-link-card",
+        "glass-card mt-4 sm:mt-6 overflow-hidden transition-all duration-300 ease-out referral-link-card",
         isExpanded ? 'max-h-[80vh]' : 'max-h-10'
       )}
     >
@@ -66,17 +66,17 @@ export const ReferralLinkCreator = () => {
 
       {isExpanded && (
         <div className="p-2 md:p-4 space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
             <Input
               type="text"
               value={refLink}
               readOnly
-              className="flex-1 bg-neutral-900/60 border-neutral-800 text-sm text-neutral-50"
+              className="flex-1 bg-neutral-900/60 border-neutral-800 text-sm text-neutral-50 w-full"
             />
             <Button
               onClick={copyToClipboard}
               variant="secondary"
-              className="bg-contrast text-black font-semibold hover:bg-contrast/90"
+              className="bg-contrast text-black font-semibold hover:bg-contrast/90 w-full sm:w-auto mt-2 sm:mt-0"
               size="sm"
             >
               <Copy className="h-4 w-4 mr-1" />
