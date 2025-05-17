@@ -321,11 +321,7 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
         )}
 
         <div className="space-y-3">
-          <label className="flex justify-between items-center mb-1">
-            <span className="text-sm text-neutral-400">Target Price Multiplier</span>
-            <span className="text-sm font-medium">{targetValue.toFixed(1)}×</span>
-          </label>
-          <div className="px-1">
+          <div className="px-1 mt-16">
             <Slider
               min={1.1}
               max={10.0}
@@ -336,10 +332,6 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
               formatValue={formatTargetValue}
               label="Target Price Multiplier"
             />
-          </div>
-          <div className="flex justify-between text-xs text-neutral-400 px-1">
-            <span>1.1×</span>
-            <span>10.0×</span>
           </div>
         </div>
 
