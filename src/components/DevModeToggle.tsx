@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState } from "react";
 
 interface DevModeContextType {
   devMode: boolean;
-  setDevMode: (on: boolean) => void;
+  setDevMode: (value: boolean) => void;
 }
 
 const DevModeContext = createContext<DevModeContextType | undefined>(undefined);

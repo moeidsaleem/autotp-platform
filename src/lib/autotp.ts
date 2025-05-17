@@ -2,7 +2,6 @@ import {
   PublicKey, 
   SystemProgram
 } from '@solana/web3.js';
-import { Program } from '@coral-xyz/anchor';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PROGRAM_ID } from './solana';
 import BN from 'bn.js';
@@ -12,7 +11,7 @@ import type { AutotpProgram, Vault } from '@/idl';
  * Initialize a new AutoTP vault
  */
 export const initializeVault = async (
-  program: Program,
+  program: AutotpProgram,
   owner: PublicKey,
   tokenMint: PublicKey,
   targetPrice: number,
@@ -49,7 +48,7 @@ export const initializeVault = async (
  * Cancel a take profit order and reclaim funds
  */
 export const cancelTP = async (
-  program: Program,
+  program: AutotpProgram,
   owner: PublicKey,
   vault: PublicKey,
   vaultTokens: PublicKey
@@ -76,7 +75,7 @@ export const cancelTP = async (
  * Execute a take profit order when price conditions are met
  */
 export const executeTP = async (
-  program: Program,
+  program: AutotpProgram,
   vault: PublicKey,
   vaultTokens: PublicKey,
   destinationUser: PublicKey,
@@ -110,7 +109,7 @@ export const executeTP = async (
  * Fetch a vault by owner
  */
 export const fetchVaultByOwner = async (
-  program: Program,
+  program: AutotpProgram,
   owner: PublicKey
 ) => {
   const vault = PublicKey.findProgramAddressSync(

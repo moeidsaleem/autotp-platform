@@ -13,13 +13,13 @@ export function AppLayout({
   links,
 }: {
   children: React.ReactNode
-  links: { label: string; path: string }[]
+  links: { label: string; path: string; icon?: React.ReactNode }[]
 }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <div className="flex flex-col min-h-screen">
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <div className="flex flex-col min-h-screen bg-black text-white">
         <AppHeader links={links} />
-        <main className="flex-grow container mx-auto p-4">
+        <main className="flex-grow pt-20">
           <ClusterChecker>
             <AccountChecker />
           </ClusterChecker>
@@ -27,7 +27,7 @@ export function AppLayout({
         </main>
         <AppFooter />
       </div>
-      <Toaster />
+      <Toaster position="bottom-right" />
     </ThemeProvider>
   )
 }

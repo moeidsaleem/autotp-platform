@@ -7,8 +7,10 @@ import { typedAutotpIdl } from '@/idl';
 // The network to connect to (mainnet-beta, testnet, devnet, or localhost)
 export const SOLANA_NETWORK = 'devnet';
 
-// Program ID from the IDL
-export const PROGRAM_ID = new PublicKey('FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS');
+// Program ID from the IDL 
+// TEMP: Using the Serum program ID here as it exists on devnet
+// This is just a placeholder for testing the UI flow until we deploy our own program
+export const PROGRAM_ID = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin');
 
 // Helper to get an RPC endpoint URL based on the network
 export const getEndpoint = () => {
@@ -35,19 +37,14 @@ export const useAutoTPProgram = () => {
       { commitment: 'confirmed', preflightCommitment: 'confirmed' }
     );
     
-    // Use a different approach to instantiate the Program
-    const programId = PROGRAM_ID;
-    const idl = typedAutotpIdl;
-    
-    // Use Function.prototype.apply to bypass TypeScript's parameter checking
-    // This allows us to call the constructor with the correct runtime arguments
-    // regardless of what TypeScript expects
     try {
-      return Function.prototype.apply.call(
-        Program, 
-        null, 
-        [idl, programId, provider]
-      );
+      // Use type casting to bypass TypeScript errors with Anchor 0.31.1
+      // This allows the Program constructor to work with the new IDL format
+      return (new Program(
+        typedAutotpIdl as any,
+        PROGRAM_ID as any,
+        provider as any
+      ) as any);
     } catch (error) {
       console.error("Error creating Solana program:", error);
       return null;

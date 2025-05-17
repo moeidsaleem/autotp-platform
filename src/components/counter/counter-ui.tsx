@@ -37,7 +37,7 @@ export function CounterList() {
         <span className="loading loading-spinner loading-lg"></span>
       ) : accounts.data?.length ? (
         <div className="grid md:grid-cols-2 gap-4">
-          {accounts.data?.map((account) => (
+          {accounts.data?.map((account: { publicKey: PublicKey }) => (
             <CounterCard key={account.publicKey.toString()} account={account.publicKey} />
           ))}
         </div>
@@ -56,7 +56,7 @@ function CounterCard({ account }: { account: PublicKey }) {
     account,
   })
 
-  const count = useMemo(() => accountQuery.data?.count ?? 0, [accountQuery.data?.count])
+  const count = useMemo(() => accountQuery.data?.count ? accountQuery.data.count.toNumber() : 0, [accountQuery.data?.count])
 
   return accountQuery.isLoading ? (
     <span className="loading loading-spinner loading-lg"></span>

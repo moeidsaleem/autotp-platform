@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Copy, Star } from "lucide-react";
@@ -31,7 +30,8 @@ export const ReferralLinkCreator = () => {
         title: "Copied!",
         description: "Referral link copied to clipboard",
       });
-    } catch (err) {
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
       toast({
         variant: "destructive",
         title: "Error",

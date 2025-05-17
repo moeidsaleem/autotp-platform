@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Token, TokenSelector } from './TokenSelector';
-import { Slider } from './Slider';
-import { VaultDoorAnimation } from './VaultDoorAnimation';
-import { useDevMode } from './DevModeToggle';
-import { TokenPriceChart } from './TokenPriceChart';
-import { SlippageDialog } from './SlippageDialog';
-import { Button } from './ui/button';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { Button } from '@/components/ui/button';
 import { Percent } from 'lucide-react';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { TokenSelector } from "@/components/TokenSelector";
+import { Slider } from "@/components/Slider";
+import { TokenPriceChart } from "@/components/TokenPriceChart";
+import type { Token, TokenWithPrice } from "@/lib/hooks/types";
+import { VaultDoorAnimation } from "@/components/VaultDoorAnimation";
+import { SlippageDialog } from "@/components/SlippageDialog";
+import { useToast } from "@/hooks/use-toast";
+import { useDevMode } from "@/components/DevModeToggle";
 import { PublicKey } from '@solana/web3.js';
-import { createTakeProfitOrder, anchorWallet } from '@/lib/auto-tp-program';
-import { toast } from 'sonner';
-
-// Define interface for tokens with price data
-interface TokenWithPrice extends Token {
-  price?: number;
-}
+import { createTakeProfitOrder } from '@/lib/auto-tp-program';
 
 interface TakeProfitCardProps {
   onOrderArmed: (message: string) => void;
@@ -47,6 +43,8 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
   const { connection } = useConnection();
   const wallet = useWallet();
   const { connected, publicKey } = wallet;
+
+  const { toast } = useToast();
 
   useEffect(() => {
     if (devMode) {
@@ -154,10 +152,10 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
         setTimeout(() => {
           setIsSubmitting(false);
           setIsVaultAnimating(false);
-          const message = `Order armed 🎯 ${selectedToken?.symbol} at ${formatTargetValue(targetValue)}×${
+          const successMessage = `Order armed 🎯 ${selectedToken?.symbol} at ${formatTargetValue(targetValue)}×${
             isStopLossEnabled ? ` / SL ${formatStopLossValue(stopLossValue)}×` : ''
           }, ${takeProfitPercent}% holding`;
-          onOrderArmed(message);
+          onOrderArmed(successMessage);
         }, 800);
       } else {
         // Real order processing using Solana program
@@ -173,43 +171,76 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
           ? (selectedToken as TokenWithPrice).price || 1
           : 1;
         
-        // Create an Anchor compatible wallet
-        // Using type assertion to handle the wallet adapter type compatibility
-        // Type checking has already been done with publicKey check above
-        // @ts-expect-error - WalletContextState has nullable fields that WalletAdapter requires
-        const anchorCompatWallet = anchorWallet(wallet);
-        
-        // Call the Solana program to create the take profit order
-        const txId = await createTakeProfitOrder(
-          connection,
-          anchorCompatWallet,
-          tokenMint,
+        console.log('Debug info:', {
+          tokenMint: tokenMint.toString(),
           targetValue,
           currentPrice,
-          takeProfitPercent
-        );
+          takeProfitPercent,
+          walletPublicKey: wallet.publicKey?.toString()
+        });
         
-        setIsSubmitting(false);
-        setIsVaultAnimating(false);
-        
-        const message = `Order armed 🎯 ${selectedToken?.symbol} at ${formatTargetValue(targetValue)}×${
-          isStopLossEnabled ? ` / SL ${formatStopLossValue(stopLossValue)}×` : ''
-        }, ${takeProfitPercent}% holding`;
-        
-        onOrderArmed(message);
-        
-        // Show transaction ID in toast
-        toast.success(`Transaction confirmed: ${txId.slice(0, 8)}...`);
-        
-        // Dispatch event to update orders table
-        const newOrderEvent = new CustomEvent('new-order-created');
-        window.dispatchEvent(newOrderEvent);
+        try {
+          if (!wallet.publicKey) {
+            throw new Error("Wallet not connected");
+          }
+          
+          // Create an Anchor compatible wallet with explicit type assertion
+          const anchorCompatWallet = {
+            publicKey: wallet.publicKey,
+            signTransaction: wallet.signTransaction!,
+            signAllTransactions: wallet.signAllTransactions!,
+          };
+          
+          // Call the Solana program to create the take profit order
+          const txId = await createTakeProfitOrder(
+            connection,
+            anchorCompatWallet,
+            tokenMint,
+            targetValue,
+            currentPrice,
+            takeProfitPercent
+          );
+          
+          setIsSubmitting(false);
+          setIsVaultAnimating(false);
+          
+          const successMessage = `Order armed 🎯 ${selectedToken?.symbol} at ${formatTargetValue(targetValue)}×${
+            isStopLossEnabled ? ` / SL ${formatStopLossValue(stopLossValue)}×` : ''
+          }, ${takeProfitPercent}% holding`;
+          
+          onOrderArmed(successMessage);
+          
+          // Show transaction ID in toast
+          toast({
+            title: "Transaction confirmed",
+            description: `${txId.slice(0, 8)}...`,
+          });
+          
+          // Dispatch event to update orders table
+          const newOrderEvent = new CustomEvent('new-order-created');
+          window.dispatchEvent(newOrderEvent);
+        } catch (txError: unknown) {
+          console.error("Transaction error:", txError);
+          setIsSubmitting(false);
+          setIsVaultAnimating(false);
+          const errorMessage = txError instanceof Error ? txError.message : 'Unknown error';
+          toast({
+            title: "Failed to arm take profit order",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error creating take profit order:", error);
       setIsSubmitting(false);
       setIsVaultAnimating(false);
-      toast.error("Failed to arm take profit order. Please try again.");
+      const errorDescription = error instanceof Error ? error.message : "Please try again";
+      toast({
+        title: "Failed to arm take profit order",
+        description: errorDescription,
+        variant: "destructive",
+      });
     }
   };
 
@@ -377,6 +408,7 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
         <button
           onClick={handleArmOrder}
           disabled={isButtonDisabled}
+          data-action="arm"
           className={`w-full py-3 px-4 rounded-lg font-medium text-center transition-colors duration-200 ${
             isButtonDisabled
               ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed'
@@ -418,5 +450,3 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
     </div>
   );
 };
-
-export default TakeProfitCard;

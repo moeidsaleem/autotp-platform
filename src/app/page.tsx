@@ -4,12 +4,11 @@ import { BackgroundDecoration } from '@/components/BackgroundDecoration'
 import { ConnectButton } from '@/components/ConnectButton'
 import { DevModeProvider } from '@/components/DevModeToggle'
 import { FeatureCarousel } from '@/components/FeatureCarousel'
-import { Logo } from '@/components/Logo'
 import { OrdersTable } from '@/components/OrdersTable'
 import { ReferralLinkCreator } from '@/components/ReferralLinkCreator'
 import { Snackbar } from '@/components/Snackbar'
 import { StatusLine } from '@/components/StatusLine'
-import TakeProfitCard from '@/components/TakeProfitCard'
+import { TakeProfitCard } from '@/components/TakeProfitCard'
 import { useState, useEffect } from 'react'
 
 export default function Home() {
@@ -34,20 +33,44 @@ export default function Home() {
       <div className="min-h-screen w-full bg-transparent text-neutral-50 relative overflow-x-hidden">
         <BackgroundDecoration />
         
-        <header className="flex justify-between items-center px-6 pt-6 pb-3 md:pt-8 md:pb-4 transition-all duration-300 ease-out">
-          <Logo />
-          <ConnectButton />
-        </header>
-
         <main className="container mx-auto px-4 pb-24 transition-all duration-300">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            {/* Left column - Hero Text and Feature Carousel */}
-            <div className="space-y-6 md:col-span-4 md:mt-16 lg:mt-20 transform transition-all duration-500 ease-out">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent animate-gradient">
-                Lock In Gains.
-                <br />
-                Sleep Easy.
+          {/* Hero section with animated gradient border */}
+          <div className="relative mb-12 mt-4 p-[1px] rounded-lg overflow-hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x">
+            <div className="absolute inset-0 bg-black bg-opacity-90 backdrop-blur-sm rounded-lg"></div>
+            <div className="relative rounded-lg p-6 md:p-8 z-10">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent animate-gradient mb-4">
+                AutoTP for Solana
               </h1>
+              <p className="text-xl md:text-2xl text-neutral-300 max-w-2xl mb-6">
+                The first automated take profit solution for Solana. Set it and forget it - we&apos;ll handle your exits so you don&apos;t have to.
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <a 
+                  href="#create-order" 
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium rounded-md transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Get Started
+                </a>
+                <a 
+                  href="/autotp" 
+                  className="px-6 py-3 border border-neutral-700 hover:border-neutral-500 text-neutral-200 font-medium rounded-md transition-all duration-300"
+                >
+                  Learn More
+                </a>
+                <div className="hidden sm:block">
+                  <ConnectButton />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start" id="create-order">
+            {/* Left column - Hero Text and Feature Carousel */}
+            <div className="space-y-6 md:col-span-4 md:mt-8 lg:mt-12 transform transition-all duration-500 ease-out">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent mb-4">
+                Lock In Gains.<br />
+                Sleep Easy.
+              </h2>
               <p className="text-lg md:text-xl text-neutral-400 max-w-md">
                 Automate your exits before it&apos;s too late.
               </p>

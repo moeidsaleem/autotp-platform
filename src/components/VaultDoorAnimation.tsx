@@ -1,6 +1,13 @@
+'use client';
 
 import React from 'react';
-import { Player } from '@lottiefiles/react-lottie-player';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the Lottie Player with ssr: false to prevent server-side rendering
+const Player = dynamic(
+  () => import('@lottiefiles/react-lottie-player').then(mod => mod.Player),
+  { ssr: false }
+);
 
 interface VaultDoorAnimationProps {
   isPlaying: boolean;
@@ -191,17 +198,19 @@ export const VaultDoorAnimation: React.FC<VaultDoorAnimationProps> = ({
 
   return (
     <div className={`absolute top-0 left-0 w-full h-full flex items-center justify-center z-10 ${isPlaying ? 'block' : 'hidden'}`}>
-      <Player
-        autoplay={isPlaying}
-        loop={false}
-        src={vaultData}
-        style={{ height: '300px', width: '300px' }}
-        onEvent={event => {
-          if (event === 'complete' && onComplete) {
-            onComplete();
-          }
-        }}
-      />
+      {isPlaying && (
+        <Player
+          autoplay={true}
+          loop={false}
+          src={vaultData}
+          style={{ height: '300px', width: '300px' }}
+          onEvent={event => {
+            if (event === 'complete' && onComplete) {
+              onComplete();
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
