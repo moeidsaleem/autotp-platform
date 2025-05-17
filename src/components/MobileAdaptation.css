@@ -125,8 +125,24 @@
   
   /* Order table header improvements */
   .orders-table [role="button"],
-  .orders-table .cursor-pointer {
-    @apply py-3;
+  .orders-table .cursor-pointer,
+  .referral-link-card .cursor-pointer {
+    @apply items-center py-3 px-4;
+  }
+  
+  /* Tab container styling */
+  .orders-table .flex.bg-neutral-800\/80 {
+    @apply overflow-hidden;
+  }
+  
+  /* Glass card headers consistency */
+  .glass-card .cursor-pointer {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Proper icon alignment */
+  .glass-card .cursor-pointer svg {
+    @apply flex-shrink-0;
   }
   
   .orders-table-content {
@@ -198,6 +214,20 @@
   }
 }
 
+@media (max-width: 390px) {
+  /* Make tabs more compact on very small screens */
+  .orders-table .flex.bg-neutral-800\/80 span {
+    @apply px-2 text-[11px];
+  }
+  
+  /* Reduce padding on very small screens */
+  .orders-table [role="button"],
+  .orders-table .cursor-pointer,
+  .referral-link-card .cursor-pointer {
+    @apply px-3;
+  }
+}
+
 /* Token selector modal styling */
 .glass-card {
   @apply relative z-10;
@@ -266,5 +296,29 @@ button:active,
 .hover-lift:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
+}
+
+/* Consistent header styling for all cards */
+.glass-card .cursor-pointer {
+  @apply border-b border-white/5 backdrop-blur-sm bg-black/20;
+}
+
+/* Make order history tabs more touch-friendly */
+.orders-table .flex.bg-neutral-800\/80 {
+  @apply p-0.5 rounded-full;
+}
+
+.orders-table .flex.bg-neutral-800\/80 span {
+  @apply min-w-14 flex items-center justify-center font-medium;
+}
+
+/* Add subtle hover effects for better UX */
+.glass-card .cursor-pointer:hover {
+  @apply bg-white/5;
+}
+
+/* Improve collapsed state for both components */
+.glass-card:not(.max-h-\[80vh\]) .cursor-pointer {
+  @apply shadow-sm;
 }
 

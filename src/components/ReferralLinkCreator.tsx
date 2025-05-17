@@ -52,11 +52,11 @@ export const ReferralLinkCreator = () => {
       )}
     >
       <div 
-        className="flex items-center justify-between p-2 cursor-pointer" 
+        className="flex items-center justify-between px-4 py-3 cursor-pointer" 
         onClick={toggleExpand}
       >
-        <div className="flex items-center gap-2">
-          <Star size={16} className="text-neutral-400" />
+        <div className="flex items-center gap-2.5">
+          <Star size={18} className="text-neutral-400" />
           <span className="text-sm font-medium">Your Referral Link</span>
         </div>
         <span className="text-neutral-400 text-sm">
@@ -65,7 +65,7 @@ export const ReferralLinkCreator = () => {
       </div>
 
       {isExpanded && (
-        <div className="p-2 md:p-4 space-y-4">
+        <div className="p-3 sm:p-4 space-y-4">
           <div className="flex flex-col sm:flex-row items-center gap-2">
             <Input
               type="text"

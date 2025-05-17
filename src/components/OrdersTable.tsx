@@ -316,45 +316,47 @@ export const OrdersTable: React.FC = () => {
       isExpanded ? 'max-h-[80vh]' : 'max-h-10'
     )}>
       <div 
-        className="flex items-center justify-between p-2 px-3 sm:px-4 cursor-pointer" 
+        className="flex items-center justify-between px-4 py-3 cursor-pointer" 
         onClick={toggleExpand}
       >
-        <div className="flex items-center gap-2">
-          <History size={16} className="text-neutral-400" />
+        <div className="flex items-center gap-2.5">
+          <History size={18} className="text-neutral-400" />
           <span className="text-sm font-medium">Transaction History</span>
         </div>
-        <div className="flex space-x-1 sm:space-x-2 md:space-x-4 overflow-x-auto no-scrollbar">
-          <span 
-            className={cn(
-              "px-1.5 sm:px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
-              activeTab === 'armed' ? 'bg-neutral-700' : 'bg-transparent'
-            )} 
-            onClick={(e) => { e.stopPropagation(); setActiveTab('armed'); }}
-          >
-            Armed
-          </span>
-          <span 
-            className={cn(
-              "px-1.5 sm:px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
-              activeTab === 'filled' ? 'bg-neutral-700' : 'bg-transparent'
-            )} 
-            onClick={(e) => { e.stopPropagation(); setActiveTab('filled'); }}
-          >
-            Filled
-          </span>
-          <span 
-            className={cn(
-              "px-1.5 sm:px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap cursor-pointer",
-              activeTab === 'cancelled' ? 'bg-neutral-700' : 'bg-transparent'
-            )} 
-            onClick={(e) => { e.stopPropagation(); setActiveTab('cancelled'); }}
-          >
-            Cancelled
+        <div className="flex items-center gap-1.5">
+          <div className="flex bg-neutral-800/80 rounded-full p-0.5">
+            <span 
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer transition-colors",
+                activeTab === 'armed' ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:text-white'
+              )} 
+              onClick={(e) => { e.stopPropagation(); setActiveTab('armed'); }}
+            >
+              Armed
+            </span>
+            <span 
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer transition-colors",
+                activeTab === 'filled' ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:text-white'
+              )} 
+              onClick={(e) => { e.stopPropagation(); setActiveTab('filled'); }}
+            >
+              Filled
+            </span>
+            <span 
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer transition-colors",
+                activeTab === 'cancelled' ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:text-white'
+              )} 
+              onClick={(e) => { e.stopPropagation(); setActiveTab('cancelled'); }}
+            >
+              Cancel
+            </span>
+          </div>
+          <span className="text-neutral-400 text-sm ml-1">
+            {isExpanded ? '▲' : '▼'}
           </span>
         </div>
-        <span className="text-neutral-400 text-sm">
-          {isExpanded ? '▲' : '▼'}
-        </span>
       </div>
 
       {isExpanded && isLoading && (
