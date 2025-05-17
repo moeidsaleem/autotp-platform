@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
 import { ChartContainer } from "./ui/chart";
 import { LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 
-export interface TokenPriceChartProps {
-  selectedToken?: {
+interface TokenPriceChartProps {
+  selectedToken: {
     symbol: string;
     name: string;
     price?: number;
@@ -104,6 +104,16 @@ export const TokenPriceChart: React.FC<TokenPriceChartProps> = ({ selectedToken 
   const [animate, setAnimate] = useState(true);
   const [livePrice, setLivePrice] = useState(defaultPrice);
 
+  // Format price with commas for thousands
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(price);
+  };
+
   // On selectedToken or timeframe change: generate mock history, run animation ONCE.
   useEffect(() => {
     setAnimate(true);
@@ -117,51 +127,19 @@ export const TokenPriceChart: React.FC<TokenPriceChartProps> = ({ selectedToken 
     return () => clearTimeout(timeout);
   }, [selectedToken, timeframe, defaultPrice]);
 
-  if (!selectedToken) {
-    return (
-      <div className="h-full flex items-center justify-center text-neutral-500 text-xs">
-        Select a token to view price chart.
-      </div>
-    );
-  }
-
   return (
-    <div className="h-full flex flex-col">
-      {/* Timeframe selector */}
-      <div className="flex gap-2 justify-end mb-1">
-        {TIMEFRAMES.map(({ label, value }) => (
-          <button
-            key={value}
-            className={`rounded-full px-3 py-1 text-xs font-medium border transition min-w-[44px]
-              ${timeframe === value
-                ? "bg-sol text-white border-sol shadow"
-                : "bg-neutral-900 text-neutral-300 border-neutral-700 hover:border-sol"}
-            `}
-            onClick={() => setTimeframe(value)}
-            disabled={timeframe === value}
-            tabIndex={0}
-            aria-label={`Set timeframe to ${label}`}
-            type="button"
-          >
-            {label}
-          </button>
-        ))}
+    <div className="w-full h-full token-price-chart">
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-base font-medium">{selectedToken.symbol}</div>
+        <div className="text-xl font-bold">{formatPrice(livePrice)}</div>
       </div>
-      {/* Chart header */}
-      <div className="flex justify-between items-center mb-1">
-        <div className="text-xs text-neutral-400 font-medium">
-          {selectedToken.name} ({selectedToken.symbol})
-        </div>
-        <div className="font-mono text-white text-md">
-          ${livePrice.toFixed(2)}
-        </div>
-      </div>
+      
       {/* Chart itself */}
-      <div className="h-[calc(100%-46px)] w-full pt-1">
+      <div className="h-36 w-full rounded-lg overflow-hidden">
         <ChartContainer config={{
           price: {
             label: "Price",
-            color: "#44e1af"
+            color: "#4ade80"
           }
         }}>
           <LineChart data={priceHistory}>
@@ -192,7 +170,7 @@ export const TokenPriceChart: React.FC<TokenPriceChartProps> = ({ selectedToken 
             <Line
               type="monotone"
               dataKey="price"
-              stroke="#44e1af"
+              stroke="#4ade80"
               dot={false}
               strokeWidth={2}
               isAnimationActive={animate}
@@ -200,6 +178,23 @@ export const TokenPriceChart: React.FC<TokenPriceChartProps> = ({ selectedToken 
             />
           </LineChart>
         </ChartContainer>
+      </div>
+      
+      {/* Time period selector */}
+      <div className="flex justify-center mt-4 space-x-2">
+        {TIMEFRAMES.map(({ label, value }) => (
+          <button
+            key={value}
+            onClick={() => setTimeframe(value)}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              timeframe === value 
+                ? 'bg-neutral-700 text-white' 
+                : 'bg-neutral-800/80 text-neutral-400 hover:text-white'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   );

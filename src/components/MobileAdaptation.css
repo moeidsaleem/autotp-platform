@@ -212,6 +212,19 @@
     @apply bottom-12 !important;
     width: calc(100% - 24px) !important;
   }
+
+  /* Better styling for slippage dialog */
+  [role="dialog"] [data-state="open"].bg-neutral-900 {
+    @apply p-4 mx-2 rounded-2xl;
+  }
+
+  [role="dialog"] .grid.grid-cols-4 {
+    @apply grid-cols-2 gap-3;
+  }
+
+  [role="dialog"] .grid.grid-cols-4 button {
+    @apply py-4;
+  }
 }
 
 @media (max-width: 390px) {
@@ -320,5 +333,14 @@ button:active,
 /* Improve collapsed state for both components */
 .glass-card:not(.max-h-\[80vh\]) .cursor-pointer {
   @apply shadow-sm;
+}
+
+/* Slippage dialog mobile adaptation */
+[role="dialog"] [data-radix-popper-content-wrapper] {
+  @apply z-50 !important;
+}
+
+.slippage-dialog-overlay {
+  backdrop-filter: blur(4px);
 }
 
