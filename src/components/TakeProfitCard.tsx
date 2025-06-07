@@ -216,8 +216,7 @@ export const TakeProfitCard: React.FC<TakeProfitCardProps> = ({ onOrderArmed }) 
           targetValue,
           currentPrice,
           takeProfitPercent,
-          undefined, // referrer
-          devMode // This won't matter now since we exit early for devMode
+          undefined // referrer
         );
         
         setIsSubmitting(false);

@@ -1,9 +1,7 @@
-import { AnchorProvider, BN } from '@coral-xyz/anchor';
-import { PublicKey, Connection, Transaction, VersionedTransaction } from '@solana/web3.js';
-import { AutotpProgram, Vault } from '../idl';
+import { BN } from '@coral-xyz/anchor';
+import { PublicKey, Connection, Transaction, VersionedTransaction, SystemProgram } from '@solana/web3.js';
+import { Vault } from '../idl';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-
-// Import the correct types for Anchor
 import * as anchor from '@coral-xyz/anchor';
 
 // Define a type for wallet adapter needed by our functions
@@ -13,8 +11,17 @@ interface WalletAdapter {
   signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]>;
 }
 
-// Program constants
-const AUTOTP_PROGRAM_ID = new PublicKey('4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq');
+// Program constants - using the deployed program ID
+const AUTOTP_PROGRAM_ID = new PublicKey('7LodHGzvDyBkGPwLyraaB7vyX7thPLtWbZ3iF7WdtUsQ');
+
+// Hardcoded instruction discriminators for the deployed program
+// These are based on the Anchor framework's standard discriminator generation
+const INSTRUCTION_DISCRIMINATORS = {
+  // Most likely correct discriminator pattern: "namespace:method_name"
+  initialize: Array.from(Buffer.from(anchor.utils.sha256.hash("initialize").slice(0, 8))),
+  cancelTp: Array.from(Buffer.from(anchor.utils.sha256.hash("cancelTp").slice(0, 8))),
+  executeTp: Array.from(Buffer.from(anchor.utils.sha256.hash("executeTp").slice(0, 8)))
+};
 
 /**
  * Helper function to check if a program exists on the blockchain
@@ -30,159 +37,6 @@ async function checkProgramExists(connection: Connection, programId: PublicKey):
 }
 
 /**
- * Helper function to write a u64 value to a buffer in little-endian format
- * This is browser-compatible unlike Buffer.writeBigUInt64LE
- */
-function writeUint64LE(buffer: Uint8Array, value: BN, offset: number): void {
-  const bn = value.clone();
-  
-  // Write 8 bytes in little-endian format
-  for (let i = 0; i < 8; i++) {
-    const byte = bn.modn(256);
-    buffer[offset + i] = byte;
-    bn.idivn(256);
-  }
-}
-
-/**
- * Creates an Auto TP Program instance
- * Using a direct approach that bypasses usual Anchor Program initialization
- */
-export function createAutotpProgram(provider: AnchorProvider): AutotpProgram {
-  try {
-    // Manually construct a minimal program interface with just what we need
-    return {
-      methods: {
-        initialize: (targetPrice: BN, referrer: PublicKey) => {
-          return {
-            accounts: (accounts: any) => {
-              return {
-                rpc: async () => {
-                  // First check if the program exists
-                  const programExists = await checkProgramExists(provider.connection, AUTOTP_PROGRAM_ID);
-                  if (!programExists) {
-                    throw new Error(
-                      `Program ${AUTOTP_PROGRAM_ID.toString()} does not exist on the current network. ` +
-                      `Please deploy the program to the network you're connecting to (e.g., devnet).`
-                    );
-                  }
-                  
-                  // Create a Uint8Array for instruction data instead of Buffer
-                  const instructionData = new Uint8Array(1 + 8 + 32); // 1 byte for instruction, 8 bytes for targetPrice, 32 bytes for referrer
-                  
-                  // Write instruction index (0 for initialize)
-                  instructionData[0] = 0;
-                  
-                  // Write targetPrice as a 64-bit number (8 bytes) in little-endian format
-                  writeUint64LE(instructionData, targetPrice, 1);
-                  
-                  // Write referrer public key (32 bytes)
-                  const referrerBytes = referrer.toBuffer();
-                  for (let i = 0; i < 32; i++) {
-                    instructionData[i + 9] = referrerBytes[i];
-                  }
-                  
-                  // Create transaction with the instruction
-                  const transaction = new Transaction().add(
-                    new anchor.web3.TransactionInstruction({
-                      keys: [
-                        { pubkey: accounts.vault, isSigner: false, isWritable: true },
-                        { pubkey: accounts.owner, isSigner: true, isWritable: true },
-                        { pubkey: accounts.tokenMint, isSigner: false, isWritable: false },
-                        { pubkey: accounts.systemProgram, isSigner: false, isWritable: false }
-                      ],
-                      programId: AUTOTP_PROGRAM_ID,
-                      data: Buffer.from(instructionData)
-                    })
-                  );
-                  
-                  try {
-                    // Set recent blockhash and fee payer
-                    transaction.feePayer = provider.wallet.publicKey;
-                    transaction.recentBlockhash = (
-                      await provider.connection.getLatestBlockhash()
-                    ).blockhash;
-                    
-                    // Have the wallet sign the transaction
-                    const signedTx = await provider.wallet.signTransaction(transaction);
-                    
-                    // Send the signed transaction
-                    const signature = await provider.connection.sendRawTransaction(
-                      signedTx.serialize()
-                    );
-                    
-                    // Wait for confirmation
-                    await provider.connection.confirmTransaction(signature, 'confirmed');
-                    
-                    return signature;
-                  } catch (error) {
-                    console.error('Transaction error:', error);
-                    
-                    if (error instanceof Error) {
-                      // Check if this is a program not found error
-                      if (error.message.includes('program not found') || 
-                          error.message.includes('program that does not exist')) {
-                        throw new Error(
-                          `Program ${AUTOTP_PROGRAM_ID.toString()} not found on the network. ` +
-                          `You need to deploy the program to this network first.`
-                        );
-                      }
-                    }
-                    
-                    throw error;
-                  }
-                }
-              };
-            }
-          };
-        },
-        cancelTp: () => {
-          return {
-            accounts: () => {
-              return {
-                rpc: async () => {
-                  return "Mocked transaction";
-                }
-              };
-            }
-          };
-        },
-        executeTp: () => {
-          return {
-            accounts: () => {
-              return {
-                rpc: async () => {
-                  return "Mocked transaction";
-                }
-              };
-            }
-          };
-        }
-      },
-      account: {
-        vault: {
-          fetch: async () => {
-            return {} as any; // Mock vault data
-          }
-        }
-      }
-    } as unknown as AutotpProgram;
-  } catch (error) {
-    console.error('Error creating AutoTP program:', error);
-    throw error;
-  }
-}
-
-// Helper function to create an Anchor wallet adapter from WalletContextState
-export function anchorWallet(wallet: WalletAdapter): anchor.Wallet {
-  return {
-    publicKey: wallet.publicKey,
-    signTransaction: wallet.signTransaction,
-    signAllTransactions: wallet.signAllTransactions,
-  } as anchor.Wallet;
-}
-
-/**
  * Creates a new take profit order for a token
  */
 export async function createTakeProfitOrder(
@@ -192,8 +46,7 @@ export async function createTakeProfitOrder(
   targetMultiplier: number,
   currentPrice: number,
   percentToSell: number,
-  referrer?: PublicKey,
-  devModeOverride = false, // Added dev mode parameter
+  referrer?: PublicKey
 ): Promise<string> {
   try {
     console.log('Creating take profit order with parameters:', {
@@ -201,52 +54,34 @@ export async function createTakeProfitOrder(
       tokenMint: tokenMint.toString(),
       targetMultiplier,
       currentPrice,
-      percentToSell,
-      devMode: devModeOverride
+      percentToSell
     });
 
-    // Create an Anchor provider
-    const provider = new AnchorProvider(
-      connection,
-      {
-        publicKey: wallet.publicKey,
-        signTransaction: wallet.signTransaction,
-        signAllTransactions: wallet.signAllTransactions,
-      } as anchor.Wallet,
-      { commitment: 'confirmed' }
-    );
-
-    // Skip program existence check if in dev mode
-    if (!devModeOverride) {
-      // Check if the program exists before proceeding
-      const programExists = await checkProgramExists(connection, AUTOTP_PROGRAM_ID);
-      if (!programExists) {
-        throw new Error(
-          `Program ${AUTOTP_PROGRAM_ID.toString()} not found on the network. ` +
-          'Please deploy the program to this network first before trying to create take profit orders.'
-        );
-      }
+    // Check if the program exists before proceeding
+    const programExists = await checkProgramExists(connection, AUTOTP_PROGRAM_ID);
+    if (!programExists) {
+      throw new Error(
+        `Program ${AUTOTP_PROGRAM_ID.toString()} not found on the network. ` +
+        'Please deploy the program to this network first before trying to create take profit orders.'
+      );
     }
-
-    const program = createAutotpProgram(provider);
     
     // Calculate the target price as a BN (fixed-point arithmetic)
     // Convert to lamports (6 decimal places is standard for most SPL tokens)
     const targetPrice = new BN(Math.floor(currentPrice * targetMultiplier * 1_000_000)); 
     
-    // Get the vault seed (using the format from the Rust program)
-    const vaultSeed = Buffer.from('vault');
-
-    // Find the PDA for the vault - using the same logic as in the Rust program
+    // Find the vault PDA using the correct seed derivation from the Rust code
     const [vaultPDA] = PublicKey.findProgramAddressSync(
-      [vaultSeed, wallet.publicKey.toBuffer()],
+      [Buffer.from("vault"), wallet.publicKey.toBuffer()],
       AUTOTP_PROGRAM_ID
     );
 
-    // Default referrer if not provided
-    const actualReferrer = referrer || wallet.publicKey;
+    console.log('Using vault PDA:', vaultPDA.toString());
 
-    console.log('Program setup complete, calling initialize with:', {
+    // Default referrer if not provided
+    const actualReferrer = referrer || PublicKey.default;
+
+    console.log('Creating transaction with:', {
       targetPrice: targetPrice.toString(),
       referrer: actualReferrer.toString(),
       vault: vaultPDA.toString(),
@@ -254,25 +89,48 @@ export async function createTakeProfitOrder(
       tokenMint: tokenMint.toString()
     });
 
-    // If in dev mode, return a mock transaction signature instead of calling the program
-    if (devModeOverride) {
-      return "DevModeTransaction_" + Math.random().toString(36).substring(2, 15);
-    }
-
-    // Initialize the take profit order - match the exact structure expected by the Rust program
-    const tx = await program.methods
-      .initialize(targetPrice, actualReferrer)
-      .accounts({
-        vault: vaultPDA,
-        owner: wallet.publicKey,
-        tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc();
-
-    return tx;
+    // Create the instruction data - using anchor's standard discriminator format
+    const initData = Buffer.concat([
+      Buffer.from(INSTRUCTION_DISCRIMINATORS.initialize),
+      Buffer.from(targetPrice.toArray("le", 8)),
+      Buffer.from(actualReferrer.toBytes())
+    ]);
+    
+    // Create the transaction instruction
+    const ix = new anchor.web3.TransactionInstruction({
+      programId: AUTOTP_PROGRAM_ID,
+      keys: [
+        // Based on Rust code, vault account initialized with init attribute, but not marked as signer
+        { pubkey: vaultPDA, isSigner: false, isWritable: true },
+        { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+        { pubkey: tokenMint, isSigner: false, isWritable: false },
+        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }
+      ],
+      data: initData
+    });
+    
+    // Create and send the transaction
+    const tx = new anchor.web3.Transaction().add(ix);
+    tx.feePayer = wallet.publicKey;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    
+    const signed = await wallet.signTransaction(tx);
+    const signature = await connection.sendRawTransaction(signed.serialize());
+    await connection.confirmTransaction(signature);
+    
+    return signature;
   } catch (error) {
     console.error('Error creating take profit order:', error);
+    
+    if (error instanceof Error && 
+        (error.message.includes('0x65') || 
+         error.message.includes('InstructionFallbackNotFound'))) {
+      throw new Error(
+        'The take profit program instruction format is not compatible. ' +
+        'This could indicate the deployed program has a different implementation than expected.'
+      );
+    }
+    
     throw error;
   }
 }
@@ -283,10 +141,16 @@ export async function createTakeProfitOrder(
 export async function cancelTakeProfitOrder(
   connection: Connection,
   wallet: WalletAdapter,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _tokenMint: PublicKey, // Using underscore to indicate it's not used directly in this function
+  vaultAddress: PublicKey,
+  vaultTokensAddress: PublicKey
 ): Promise<string> {
   try {
+    console.log('Cancelling take profit order:', {
+      wallet: wallet.publicKey.toString(),
+      vault: vaultAddress.toString(),
+      vaultTokens: vaultTokensAddress.toString()
+    });
+
     // Check if the program exists before proceeding
     const programExists = await checkProgramExists(connection, AUTOTP_PROGRAM_ID);
     if (!programExists) {
@@ -296,65 +160,205 @@ export async function cancelTakeProfitOrder(
       );
     }
 
-    // Create an Anchor provider
-    const provider = new AnchorProvider(
-      connection,
-      {
-        publicKey: wallet.publicKey,
-        signTransaction: wallet.signTransaction,
-        signAllTransactions: wallet.signAllTransactions,
-      } as anchor.Wallet,
-      { commitment: 'confirmed' }
-    );
-
-    const program = createAutotpProgram(provider);
+    // Direct approach using the standard Anchor discriminator format
+    const cancelData = Buffer.from([
+      ...INSTRUCTION_DISCRIMINATORS.cancelTp, // cancelTp discriminator
+      // No arguments for cancelTp function
+    ]);
     
-    // Get the vault seed - using the format from the Rust program
-    const vaultSeed = Buffer.from('vault');
-
-    // Find the PDA for the vault - using the same logic as in the Rust program
-    const [vaultPDA] = PublicKey.findProgramAddressSync(
-      [vaultSeed, wallet.publicKey.toBuffer()],
-      AUTOTP_PROGRAM_ID
-    );
-
-    // Create the vault token account
-    const [vaultTokenAccount] = PublicKey.findProgramAddressSync(
-      [Buffer.from('token-account'), vaultPDA.toBuffer()],
-      AUTOTP_PROGRAM_ID
-    );
-
-    // Cancel the take profit order
-    const tx = await program.methods
-      .cancelTp()
-      .accounts({
-        vault: vaultPDA,
-        vaultTokens: vaultTokenAccount,
-        owner: wallet.publicKey,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .rpc();
-
-    return tx;
+    // Create the transaction instruction
+    const ix = new anchor.web3.TransactionInstruction({
+      programId: AUTOTP_PROGRAM_ID,
+      keys: [
+        { pubkey: vaultAddress, isSigner: false, isWritable: true },
+        { pubkey: vaultTokensAddress, isSigner: false, isWritable: true },
+        { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+        { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+      ],
+      data: cancelData
+    });
+    
+    // Create and send the transaction
+    const tx = new anchor.web3.Transaction().add(ix);
+    tx.feePayer = wallet.publicKey;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    
+    const signed = await wallet.signTransaction(tx);
+    const signature = await connection.sendRawTransaction(signed.serialize());
+    await connection.confirmTransaction(signature);
+    
+    return signature;
   } catch (error) {
     console.error('Error canceling take profit order:', error);
+    
+    if (error instanceof Error && 
+        (error.message.includes('0x65') || 
+         error.message.includes('InstructionFallbackNotFound'))) {
+      throw new Error(
+        'The take profit program cancel instruction format is not compatible. ' +
+        'This could indicate the on-chain program does not match the expected program ID or format.'
+      );
+    }
+    
+    throw error;
+  }
+}
+
+/**
+ * Execute a take profit order
+ */
+export async function executeTakeProfitOrder(
+  connection: Connection,
+  wallet: WalletAdapter,
+  vaultAddress: PublicKey,
+  vaultTokensAddress: PublicKey,
+  destinationUser: PublicKey,
+  destinationProtocol: PublicKey,
+  destinationReferrer: PublicKey,
+  currentPrice: number
+): Promise<string> {
+  try {
+    console.log('Executing take profit order:', {
+      wallet: wallet.publicKey.toString(),
+      vault: vaultAddress.toString(),
+      currentPrice
+    });
+
+    // Check if the program exists before proceeding
+    const programExists = await checkProgramExists(connection, AUTOTP_PROGRAM_ID);
+    if (!programExists) {
+      throw new Error(
+        `Program ${AUTOTP_PROGRAM_ID.toString()} not found on the network. ` +
+        'Please deploy the program to this network first.'
+      );
+    }
+
+    // Current price as BN for the argument
+    const currentPriceBN = new BN(Math.floor(currentPrice * 1_000_000));
+
+    // Direct approach using the standard Anchor discriminator format
+    const executeData = Buffer.from([
+      ...INSTRUCTION_DISCRIMINATORS.executeTp, // executeTp discriminator
+      ...currentPriceBN.toArray("le", 8)      // currentPrice as u64
+    ]);
+    
+    // Create the transaction instruction
+    const ix = new anchor.web3.TransactionInstruction({
+      programId: AUTOTP_PROGRAM_ID,
+      keys: [
+        { pubkey: vaultAddress, isSigner: false, isWritable: true },
+        { pubkey: vaultTokensAddress, isSigner: false, isWritable: true },
+        { pubkey: destinationUser, isSigner: false, isWritable: true },
+        { pubkey: destinationProtocol, isSigner: false, isWritable: true },
+        { pubkey: destinationReferrer, isSigner: false, isWritable: true },
+        { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+      ],
+      data: executeData
+    });
+    
+    // Create and send the transaction
+    const tx = new anchor.web3.Transaction().add(ix);
+    tx.feePayer = wallet.publicKey;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    
+    const signed = await wallet.signTransaction(tx);
+    const signature = await connection.sendRawTransaction(signed.serialize());
+    await connection.confirmTransaction(signature);
+    
+    return signature;
+  } catch (error) {
+    console.error('Error executing take profit order:', error);
+    
+    if (error instanceof Error && 
+        (error.message.includes('0x65') || 
+         error.message.includes('InstructionFallbackNotFound'))) {
+      throw new Error(
+        'The take profit program execution instruction format is not compatible. ' +
+        'This could indicate the on-chain program does not match the expected program ID or format.'
+      );
+    }
+    
     throw error;
   }
 }
 
 /**
  * Gets all active take profit orders for a wallet
- * 
- * Note: This is a mock implementation that returns an empty array.
- * In a real application, this function would fetch program accounts
- * filtered by owner from the blockchain.
  */
 export async function getActiveTakeProfitOrders(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   connection: Connection,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   walletAddress: PublicKey,
 ): Promise<Vault[]> {
-  // Mock implementation - intentionally not using the parameters
-  return [];
-} 
+  try {
+    console.log('Fetching active take profit orders for:', walletAddress.toString());
+    
+    // Query all accounts owned by the program
+    const accounts = await connection.getProgramAccounts(AUTOTP_PROGRAM_ID, {
+      filters: [
+        {
+          memcmp: {
+            offset: 8, // Skip discriminator
+            bytes: walletAddress.toBase58() // Find accounts where owner matches walletAddress
+          }
+        }
+      ]
+    });
+    
+    console.log(`Found ${accounts.length} program accounts`);
+    
+    // Parse each account into a Vault structure
+    const vaults: Vault[] = [];
+    
+    for (const account of accounts) {
+      try {
+        // Match the exact structure from the Rust code: Vault struct with specific fields
+        if (account.account.data.length < 8 + 32 + 32 + 8 + 32 + 8 + 1) {
+          console.log('Skipping account with insufficient data length');
+          continue;
+        }
+        
+        // Skip discriminator (8 bytes)
+        let offset = 8;
+        
+        // Read owner (32 bytes)
+        const owner = new PublicKey(account.account.data.slice(offset, offset + 32));
+        offset += 32;
+        
+        // Read token mint (32 bytes)
+        const tokenMint = new PublicKey(account.account.data.slice(offset, offset + 32));
+        offset += 32;
+        
+        // Read target price (8 bytes)
+        const targetPrice = new BN(account.account.data.slice(offset, offset + 8), 'le');
+        offset += 8;
+        
+        // Read referrer (32 bytes)
+        const referrer = new PublicKey(account.account.data.slice(offset, offset + 32));
+        offset += 32;
+        
+        // Read current price (8 bytes)
+        const currentPrice = new BN(account.account.data.slice(offset, offset + 8), 'le');
+        offset += 8;
+        
+        // Read ready for execution (1 byte)
+        const readyForExecution = account.account.data[offset] === 1;
+        
+        vaults.push({
+          owner,
+          tokenMint,
+          targetPrice,
+          referrer,
+          currentPrice,
+          readyForExecution
+        });
+      } catch (err) {
+        console.error('Error parsing vault account:', err);
+      }
+    }
+    
+    return vaults;
+  } catch (error) {
+    console.error('Error fetching active take profit orders:', error);
+    return [];
+  }
+}

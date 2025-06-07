@@ -1,8 +1,5 @@
 [workspace]
 members = [
-    "programs/autotp"
-]
-exclude = [
     "programs/anchor"
 ]
 resolver = "2"

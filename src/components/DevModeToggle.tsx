@@ -13,7 +13,7 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <DevModeContext.Provider value={{ devMode, setDevMode }}>
       {children}
-      <div className="fixed top-4 right-4 z-50">
+      {/* <div className="fixed top-4 right-4 z-50">
         <label className="flex items-center space-x-2 bg-black/70 p-2 rounded-xl shadow-lg select-none">
           <input
             type="checkbox"
@@ -23,7 +23,7 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
           />
           <span className="text-xs text-white">Dev Mode 🛠️</span>
         </label>
-      </div>
+      </div> */}
     </DevModeContext.Provider>
   );
 };

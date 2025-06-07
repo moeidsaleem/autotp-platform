@@ -3,7 +3,7 @@ import './globals.css'
 import { AppProviders } from '@/components/app-providers'
 import { AppLayout } from '@/components/app-layout'
 import React from 'react'
-import { Home, Rocket, User, GitMerge } from 'lucide-react'
+// import { Home, Rocket, User, GitMerge } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'AutoTP - Automated Take Profit',
@@ -11,18 +11,24 @@ export const metadata: Metadata = {
 }
 
 const links: { label: string; path: string; icon?: React.ReactNode }[] = [
-  { label: 'Home', path: '/', icon: <Home size={16} /> },
-  { label: 'AutoTP', path: '/autotp', icon: <Rocket size={16} /> },
-  { label: 'Account', path: '/account', icon: <User size={16} /> },
-  { label: 'Counter Demo', path: '/counter', icon: <GitMerge size={16} /> },
+  // { label: 'Home', path: '/', icon: <Home size={16} /> },
+  // { label: 'AutoTP', path: '/autotp', icon: <Rocket size={16} /> },
+  // { label: 'Account', path: '/account', icon: <User size={16} /> },
+  // { label: 'Counter Demo', path: '/counter', icon: <GitMerge size={16} /> },
 ]
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`antialiased`}>
+      <body className={`antialiased`} suppressHydrationWarning>
         <AppProviders>
-          <AppLayout links={links}>{children}</AppLayout>
+          <AppLayout 
+            links={links}
+            backgroundType={'grid'}
+            className='bg-grid-small-white-dark dark:bg-grid-small-black'
+          >
+            {children}
+          </AppLayout>
         </AppProviders>
       </body>
     </html>

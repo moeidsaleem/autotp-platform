@@ -3,7 +3,7 @@ import { History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { getActiveTakeProfitOrders, cancelTakeProfitOrder, anchorWallet } from '@/lib/auto-tp-program';
+import { getActiveTakeProfitOrders, cancelTakeProfitOrder } from '@/lib/auto-tp-program';
 import { useDevMode } from './DevModeToggle';
 import { PublicKey } from '@solana/web3.js';
 import { getTokenMetadata } from '@/lib/token-metadata';
@@ -248,44 +248,54 @@ export const OrdersTable: React.FC = () => {
     if (!tokenMint || !publicKey) {
       toast({
         title: "Cannot cancel order",
-        description: "Missing order information or wallet not connected",
+        description: "Missing token information or wallet not connected",
         variant: "destructive",
       });
       return;
     }
     
     try {
-      // Convert string to PublicKey
-      const mintPublicKey = new PublicKey(tokenMint);
+      setIsLoading(true);
       
-      // Using type assertion to handle the wallet adapter type compatibility
-      // We've already checked publicKey is not null
-      // @ts-expect-error - WalletContextState has nullable fields that WalletAdapter requires
-      const anchorCompatWallet = anchorWallet(wallet);
+      // Find the vault address for this order
+      const vaultAddress = PublicKey.findProgramAddressSync(
+        [Buffer.from("vault"), publicKey.toBuffer()],
+        new PublicKey("4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq")
+      )[0];
+      
+      // For this example, we'll use a dummy vault tokens address
+      // In a real implementation, you would find the correct token account
+      const vaultTokensAddress = PublicKey.findProgramAddressSync(
+        [Buffer.from("token-account"), vaultAddress.toBuffer()],
+        new PublicKey("4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq")
+      )[0];
       
       // Call program to cancel order
       await cancelTakeProfitOrder(
         connection,
-        anchorCompatWallet,
-        mintPublicKey
+        wallet as any, // Type assertion to handle wallet adapter compatibility
+        vaultAddress,
+        vaultTokensAddress
       );
       
-      // Update UI
+      // Update orders state
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, status: 'cancelled' } : order
       ));
       
       toast({
-        title: "Order cancelled successfully",
-        variant: "default",
+        title: "Order cancelled",
+        description: "The take profit order has been cancelled successfully",
       });
     } catch (error) {
       console.error('Error cancelling order:', error);
       toast({
         title: "Failed to cancel order",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again later",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -12,10 +12,10 @@ no-idl = true
 no-entrypoint = false
 
 [programs.localnet]
-autotp = "FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
+autotp = "7LodHGzvDyBkGPwLyraaB7vyX7thPLtWbZ3iF7WdtUsQ"
 
 [programs.devnet]
-autotp = "FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
+autotp = "7LodHGzvDyBkGPwLyraaB7vyX7thPLtWbZ3iF7WdtUsQ"
 
 [registry]
 url = "https://api.apr.dev"
@@ -27,7 +27,7 @@ wallet = "~/.config/solana/id.json"
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 build = "anchor build"
-idl = "anchor idl parse -f programs/autotp/src/lib.rs -o target/idl/autotp.json"
+idl = "anchor idl parse -f programs/anchor/src/lib.rs -o target/idl/autotp.json"
 copy-idl = "mkdir -p ../src/idl && cp target/idl/autotp.json ../src/idl/"
 build-all = "anchor run build && anchor run idl && anchor run copy-idl"
 

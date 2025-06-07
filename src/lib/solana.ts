@@ -8,8 +8,6 @@ import { typedAutotpIdl } from '@/idl';
 export const SOLANA_NETWORK = 'devnet';
 
 // Program ID from the IDL 
-// TEMP: Using the Serum program ID here as it exists on devnet
-// This is just a placeholder for testing the UI flow until we deploy our own program
 export const PROGRAM_ID = new PublicKey('4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq');
 
 // Helper to get an RPC endpoint URL based on the network
@@ -38,8 +36,7 @@ export const useAutoTPProgram = () => {
     );
     
     try {
-      // Use type casting to bypass TypeScript errors with Anchor 0.31.1
-      // This allows the Program constructor to work with the new IDL format
+      // Create program instance
       return (new Program(
         typedAutotpIdl as any,
         PROGRAM_ID as any,

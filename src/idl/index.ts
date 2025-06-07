@@ -4,11 +4,15 @@ import type { AutotpIdl, Vault, AutotpProgram } from './types';
 const minimalIdl = {
   version: "0.1.0",
   name: "autotp",
+  programId: "7LodHGzvDyBkGPwLyraaB7vyX7thPLtWbZ3iF7WdtUsQ",
+  metadata: {
+    address: "7LodHGzvDyBkGPwLyraaB7vyX7thPLtWbZ3iF7WdtUsQ"
+  },
   instructions: [
     {
       name: "initialize",
       accounts: [
-        { name: "vault", isMut: true, isSigner: true },
+        { name: "vault", isMut: true, isSigner: false },
         { name: "owner", isMut: true, isSigner: true },
         { name: "tokenMint", isMut: false, isSigner: false },
         { name: "systemProgram", isMut: false, isSigner: false }

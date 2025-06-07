@@ -20,8 +20,8 @@ export RUSTFLAGS="--cfg feature=\"no-idl-build\" --cfg feature=\"skip-lint\""
 
 # Build the program first using cargo directly with specific flags
 echo "Building program using cargo with disabled frozen-abi..."
-cd programs/autotp
-cargo build-sbf --no-default-features
+cd programs/anchor
+cargo +nightly build-sbf --no-default-features -Znext-lockfile-bump
 cd ../..
 
 # Copy binary to expected location
@@ -30,7 +30,7 @@ mkdir -p target/deploy/
 cp $(find ./target/deploy -name "*.so" 2>/dev/null || echo "./target/sbf-solana-solana/release/autotp.so") target/deploy/autotp.so
 
 # Get the program ID
-PROGRAM_ID="FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
+PROGRAM_ID="4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq"
 echo "Program ID: $PROGRAM_ID"
 
 # Set to devnet
@@ -55,7 +55,7 @@ solana program deploy target/deploy/autotp.so --program-id $PROGRAM_ID
 # Generate the IDL manually
 echo "Generating IDL..."
 mkdir -p target/idl
-anchor idl parse -f programs/autotp/src/lib.rs -o target/idl/autotp.json
+anchor idl parse -f programs/anchor/src/lib.rs -o target/idl/autotp.json
 mkdir -p ../src/idl && cp target/idl/autotp.json ../src/idl/
 
 echo "Deployment complete. Program ID: $PROGRAM_ID"

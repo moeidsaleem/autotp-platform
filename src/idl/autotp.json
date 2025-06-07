@@ -8,7 +8,7 @@
         {
           "name": "vault",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "owner",
@@ -107,7 +107,7 @@
   ],
   "accounts": [
     {
-      "name": "Vault",
+      "name": "vault",
       "type": {
         "kind": "struct",
         "fields": [
@@ -150,5 +150,8 @@
       "name": "Unauthorized",
       "msg": "Unauthorized action."
     }
-  ]
+  ],
+  "metadata": {
+    "address": "7LodHGzvDyBkGPwLyraaB7vyX7thPLtWbZ3iF7WdtUsQ"
+  }
 }

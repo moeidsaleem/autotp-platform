@@ -3,7 +3,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 // Declare the program ID
-declare_id!("FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS");
+declare_id!("4zNsNcDNWFJUPhpBF2j6ZBA4f6arEHn3hEx1osH6Hvkq");
 
 #[program]
 pub mod autotp {

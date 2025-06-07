@@ -1,6 +1,6 @@
 'use client'
 
-import { BackgroundDecoration } from '@/components/BackgroundDecoration'
+// import { BackgroundDecoration } from '@/components/BackgroundDecoration'
 // import { ConnectButton } from '@/components/ConnectButton'
 import { DevModeProvider } from '@/components/DevModeToggle'
 import { FeatureCarousel } from '@/components/FeatureCarousel'
@@ -9,6 +9,7 @@ import { ReferralLinkCreator } from '@/components/ReferralLinkCreator'
 import { Snackbar } from '@/components/Snackbar'
 import { StatusLine } from '@/components/StatusLine'
 import { TakeProfitCard } from '@/components/TakeProfitCard'
+
 import { useState, useEffect } from 'react'
 
 export default function Home() {
@@ -30,10 +31,12 @@ export default function Home() {
 
   return (
     <DevModeProvider>
-      <div className="min-h-screen w-full bg-transparent text-neutral-50 relative overflow-x-hidden">
-        <BackgroundDecoration />
+      <div className="min-h-screen w-full text-neutral-50 relative overflow-x-hidden">
+        {/* Background is now handled by AppLayout with Aceternity UI Grid */}
         
-        <main className="container mx-auto px-4 sm:px-6 pb-24 transition-all duration-300">
+   
+        
+        <main className="container mx-auto px-4 sm:px-6 pb-24 transition-all duration-300 relative z-10">
        
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-start pt-4 sm:pt-8" id="create-order">
             {/* Left column - Hero Text and Feature Carousel */}
@@ -42,7 +45,7 @@ export default function Home() {
                 Lock In Gains.<br />
                 Sleep Easy.
               </h2>
-              <p className="text-lg md:text-xl text-neutral-400 max-w-md">
+              <p className="text-lg md:text-xl text-neutral-300 max-w-md">
                 Automate your exits before it&apos;s too late.
               </p>
               <div className="pt-2">
